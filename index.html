@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- PM (Spelling only) — Auto Mark | Designed by Lim Kim Sze © 2026 -->
+  <!-- PM Reading + Spelling — Local Progress Records | Designed by Lim Kim Sze © 2026 -->
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-  <title>Progress Monitoring — I Can Spell (Auto Mark)</title>
+  <title>Progress Monitoring — I Can Read &amp; I Can Spell</title>
 
   <!-- Favicon (Kim Sze standard) -->
   <link rel="icon" href="./kimsze_sharp16.ico?v=20260111a" sizes="any">
@@ -129,6 +129,27 @@
       font-weight:900;
       font-size:16px;
       outline:none;
+    }
+    .nameDrop{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex-wrap:wrap;
+      padding:5px;
+      border:3px dashed transparent;
+      border-radius:14px;
+      transition:.15s ease;
+    }
+    .nameDrop.dragOver{
+      border-color:#0ea5e9;
+      background:#e0f2fe;
+    }
+    .dropHint{
+      font-size:11px;
+      color:#64748b;
+      font-weight:900;
+      max-width:90px;
+      line-height:1.15;
     }
 
     .sub{
@@ -512,6 +533,101 @@
       flex-wrap:wrap;
       margin-bottom:12px;
     }
+    .teacherSection{
+      border:3px solid #0b0f17;
+      border-radius:14px;
+      padding:12px;
+      margin-bottom:14px;
+      background:#f8fafc;
+    }
+    .teacherSection h3{
+      margin:0 0 10px;
+      font-size:16px;
+      font-weight:1000;
+      color:#0b1220;
+    }
+    .rosterChips{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      min-height:48px;
+      align-items:center;
+      padding:8px;
+      border:2px solid #cbd5e1;
+      border-radius:12px;
+      background:#fff;
+    }
+    .pupilChip{
+      display:inline-flex;
+      align-items:center;
+      gap:5px;
+      padding:7px 9px;
+      border:2px solid #0b0f17;
+      border-radius:999px;
+      background:#e0f2fe;
+      color:#0b1220;
+      font-weight:1000;
+      cursor:grab;
+      user-select:none;
+    }
+    .pupilChip:active{cursor:grabbing;}
+    .chipUse,.chipRemove{
+      border:0;
+      border-radius:999px;
+      padding:4px 7px;
+      font-weight:1000;
+      cursor:pointer;
+    }
+    .chipUse{background:#16a34a;color:#fff;}
+    .chipRemove{background:#fee2e2;color:#991b1b;}
+    .adminDrop{
+      min-width:min(360px, 92vw);
+      min-height:64px;
+      border:3px dashed #0ea5e9;
+      border-radius:14px;
+      background:#e0f2fe;
+      color:#075985;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      padding:10px 14px;
+      font-weight:1000;
+      transition:.15s ease;
+    }
+    .adminDrop.dragOver{
+      background:#bae6fd;
+      transform:scale(1.01);
+    }
+    .progressChartWrap{
+      overflow:auto;
+      max-height:420px;
+      border-radius:12px;
+    }
+    .progressTable th{top:0;}
+    .progressCell{
+      min-width:190px;
+      cursor:pointer;
+      background:#fff;
+    }
+    .progressCell:hover{background:#f0f9ff;}
+    .progressCell.empty{
+      color:#94a3b8;
+      cursor:default;
+      text-align:center;
+      background:#f8fafc;
+    }
+    .progressMeta{
+      margin-top:4px;
+      font-size:11px;
+      color:#475569;
+      line-height:1.35;
+    }
+    .localSaved{
+      background:#dcfce7;
+      border-color:#16a34a;
+      color:#14532d;
+    }
     .tInput{
       border:3px solid var(--line);
       border-radius:12px;
@@ -559,6 +675,28 @@
     .btnSmall.secondary{background:#64748b; color:#fff;}
     .btnSmall.good{background:var(--ok); color:#fff;}
     .btnSmall.danger{background:#dc2626; color:#fff;}
+    .btnSmall.holdReset{
+      position:relative;
+      overflow:hidden;
+      isolation:isolate;
+      min-width:190px;
+      background:#991b1b;
+      color:#fff;
+      touch-action:none;
+    }
+    .btnSmall.holdReset::before{
+      content:"";
+      position:absolute;
+      z-index:-1;
+      inset:0 auto 0 0;
+      width:var(--hold-progress, 0%);
+      background:linear-gradient(90deg,#f97316,#facc15);
+      transition:width .08s linear;
+    }
+    .btnSmall.holdReset.holding{
+      color:#111827;
+      box-shadow:0 0 0 4px rgba(250,204,21,.35);
+    }
 
     .detailCard{
       margin-top:12px;
@@ -619,6 +757,326 @@
     }
     .workTable th{ top: 0; position: sticky; z-index: 0; }
 
+    /* Reading + spelling booklet layout */
+    .card{
+      width:min(1480px, calc(100vw - 18px));
+      border-radius:0;
+      border-width:4px;
+    }
+    .programmeTitle{
+      padding:14px 18px 4px;
+      font-size:18px;
+      line-height:1.25;
+      background:#fff;
+    }
+    .pmTop{
+      padding:10px 18px 12px;
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+      background:#fff;
+    }
+    .cycleBadge{
+      border:4px solid var(--line);
+      padding:10px 22px;
+      font-size:25px;
+      font-weight:1000;
+      text-decoration:underline;
+      text-underline-offset:5px;
+      background:#fff;
+      white-space:nowrap;
+    }
+    .pmTopTools{
+      display:flex;
+      align-items:center;
+      justify-content:flex-end;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .bookletDates{
+      border-top:4px solid var(--line);
+      border-bottom:4px solid var(--line);
+    }
+    .sessionSheet{
+      display:grid;
+      grid-template-columns:86px minmax(0,1fr);
+      background:#fff;
+    }
+    .sessionSide{
+      border-right:4px solid var(--line);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:8px 4px;
+      min-height:560px;
+      overflow:hidden;
+    }
+    .sessionSideText{
+      writing-mode:vertical-rl;
+      transform:rotate(180deg);
+      font-size:18px;
+      font-weight:1000;
+      line-height:1.25;
+      text-align:center;
+    }
+    .bookletGrid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      min-width:0;
+    }
+    .domainPanel{
+      min-width:0;
+      display:flex;
+      flex-direction:column;
+    }
+    .domainPanel + .domainPanel{border-left:4px solid var(--line);}
+    .domainTitle{
+      height:58px;
+      padding:6px 10px;
+      box-sizing:border-box;
+      display:flex;
+      align-items:center;
+      gap:12px;
+      font-size:25px;
+      font-weight:1000;
+      text-decoration:underline;
+      text-underline-offset:4px;
+      border-bottom:4px solid var(--line);
+    }
+    .domainIcon{
+      color:#9ca3af;
+      font-size:38px;
+      text-decoration:none;
+      line-height:1;
+    }
+    .domainTryHead{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      background:#c7c7c7;
+      border-bottom:4px solid var(--line);
+    }
+    .domainTryHead > div{
+      padding:7px 9px;
+      font-weight:1000;
+      border-left:4px solid var(--line);
+    }
+    .domainTryHead > div:first-child{border-left:0;}
+    .domainTryCols{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      flex:1;
+      min-height:430px;
+    }
+    .domainTryCol{
+      min-width:0;
+      display:flex;
+      flex-direction:column;
+      border-left:4px solid var(--line);
+    }
+    .domainTryCol:first-child{border-left:0;}
+    .domainTryCol .blankArea{
+      min-height:0;
+      padding:12px 10px 8px;
+      gap:13px;
+    }
+    .domainTryCol .line{
+      grid-template-columns:30px minmax(0,1fr) 42px;
+      gap:5px;
+    }
+    .domainTryCol .idx{font-size:16px;}
+    .domainTryCol .ans{font-size:18px;}
+    .domainTryCol .hear{
+      width:40px;
+      height:40px;
+      border-radius:8px;
+    }
+    .domainTryCol .colActions{padding:8px 10px 10px;}
+    .domainTryCol .bigMark{font-size:16px; padding:11px 8px; border-radius:8px;}
+    .domainMastery{
+      border-top:4px solid var(--line);
+      background:#c7c7c7;
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      min-height:88px;
+    }
+    .domainMastery .starBox{
+      border-radius:0;
+      padding:7px 5px;
+      gap:7px;
+      font-size:16px;
+      text-align:center;
+      background:transparent !important;
+    }
+    .domainMastery .starActive{
+      border:0;
+      box-shadow:inset 0 0 0 4px var(--line);
+      background:#fff !important;
+    }
+    .domainMastery .star{font-size:36px;}
+    .readingArea{
+      padding:10px 8px;
+      display:flex;
+      flex-direction:column;
+      gap:7px;
+      flex:1;
+    }
+    .readItem{
+      border:2px solid #cbd5e1;
+      border-radius:8px;
+      padding:6px;
+      background:#fff;
+    }
+    .readItemLabel{
+      min-height:24px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      font-size:18px;
+      font-weight:850;
+      letter-spacing:2px;
+      overflow-wrap:anywhere;
+    }
+    .readChoice{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:5px;
+      margin-top:5px;
+    }
+    .readingArea.dense{gap:4px;}
+    .readingArea.dense .readItem{
+      display:grid;
+      grid-template-columns:minmax(45px,1fr) 106px;
+      gap:4px;
+      align-items:center;
+      padding:4px;
+    }
+    .readingArea.dense .readItemLabel{
+      min-height:20px;
+      font-size:15px;
+      letter-spacing:1px;
+    }
+    .readingArea.dense .readChoice{margin-top:0;}
+    .readingArea.dense .readMark{
+      font-size:20px;
+      min-height:28px;
+    }
+    .readMark{
+      border:2px solid var(--line);
+      background:#fff;
+      border-radius:7px;
+      padding:5px 3px;
+      font-size:22px;
+      line-height:1;
+      font-weight:1000;
+      cursor:pointer;
+    }
+    .readMark.good.active{background:#dcfce7; color:#14532d; border-color:#16a34a;}
+    .readMark.bad.active{background:#fee2e2; color:#7f1d1d; border-color:#dc2626;}
+    .readMark:disabled{opacity:.4; cursor:not-allowed;}
+    .readScore{
+      padding:7px 8px;
+      border-top:2px solid #cbd5e1;
+      text-align:center;
+      font-size:12px;
+      font-weight:1000;
+      background:#f8fafc;
+    }
+    .readSubmitWrap{
+      padding:8px 9px;
+      border-top:2px solid #cbd5e1;
+      background:#fff;
+    }
+    .readSubmit{
+      width:100%;
+      border:3px solid var(--line);
+      border-radius:8px;
+      padding:10px 7px;
+      background:#0ea5e9;
+      color:#fff;
+      font-size:14px;
+      font-weight:1000;
+      cursor:pointer;
+    }
+    .readSubmit.submitted{
+      background:#16a34a;
+    }
+    .readSubmit:disabled{
+      opacity:.55;
+      cursor:not-allowed;
+    }
+    .readingHelp{
+      padding:8px 12px;
+      border-top:4px solid var(--line);
+      background:#fff7ed;
+      color:#7c2d12;
+      font-size:12px;
+      font-weight:900;
+    }
+    .actionBar{position:static;}
+    .hdr{
+      border-top:4px solid var(--line);
+      border-bottom:0;
+      padding:10px 14px;
+    }
+    .hdr h1{font-size:22px; text-decoration:none;}
+    .pencil{width:36px;height:36px;}
+    .sub{
+      padding:8px 14px;
+      border-top:2px solid #e5e7eb;
+    }
+    .scoreDomain{
+      display:inline-flex;
+      gap:5px;
+      align-items:center;
+    }
+
+    @media (max-width: 900px){
+      .sessionSheet{grid-template-columns:1fr;}
+      .sessionSide{
+        min-height:0;
+        border-right:0;
+        border-bottom:4px solid var(--line);
+        padding:8px 10px;
+      }
+      .sessionSideText{writing-mode:horizontal-tb; transform:none; font-size:16px;}
+      .bookletGrid{grid-template-columns:1fr;}
+      .domainPanel + .domainPanel{border-left:0; border-top:6px solid var(--line);}
+      .domainTryCols{min-height:360px;}
+    }
+
+    @media (max-width: 620px){
+      .wrap{padding:4px;}
+      .card{width:calc(100vw - 8px);}
+      .programmeTitle{font-size:15px; padding:10px 10px 2px;}
+      .pmTop{padding:8px 10px;}
+      .cycleBadge{font-size:20px; padding:8px 12px;}
+      .pmTopTools{justify-content:flex-start;}
+      .nameInput{width:min(250px,72vw);}
+      .domainTryCols{
+        grid-template-columns:1fr;
+      }
+      .domainTryCol{
+        border-left:0;
+        border-top:4px solid var(--line);
+      }
+      .domainTryCol:first-child{border-top:0;}
+      .domainTryHead{display:none;}
+      .domainTryCol::before{
+        content:attr(data-label);
+        display:block;
+        padding:7px 9px;
+        background:#c7c7c7;
+        border-bottom:4px solid var(--line);
+        font-weight:1000;
+      }
+      .bookletDates{grid-template-columns:1fr;}
+      .bookletDates .dateCell{border-left:0;border-top:3px solid var(--line);}
+      .bookletDates .dateCell:first-child{border-top:0;}
+    }
+
     @media (max-width: 520px){
       .hdr h1{font-size:26px;}
       .tryHead div{font-size:18px;}
@@ -637,15 +1095,31 @@
 <body>
 <div class="wrap">
   <div class="card" id="card">
+    <div class="programmeTitle">
+      Progress Monitoring &amp; Differentiated Instruction
+      <div id="cycleTitle">Cycle 1</div>
+    </div>
+
+    <div class="pmTop">
+      <div class="cycleBadge" id="cycleBadge">Cycle 1 PM</div>
+      <div class="pmTopTools">
+        <span class="tag" id="sessionTag">C1S1</span>
+        <label class="tiny" for="sessionSel">Session:</label>
+        <select class="sel" id="sessionSel" aria-label="Select session"></select>
+      </div>
+    </div>
+
     <div class="hdr">
       <div class="hdrLeft">
-        <h1>I Can Spell</h1>
-        <div class="pencil" aria-hidden="true">✎</div>
+        <h1>PM Reading &amp; Spelling</h1>
       </div>
 
       <div class="nameBox">
         <span>Name:</span>
-        <input class="nameInput" id="studentName" placeholder="Teacher to key in pupil name" />
+        <div class="nameDrop" id="studentNameDrop">
+          <input class="nameInput" id="studentName" placeholder="Teacher to key in or select pupil" />
+          <span class="dropHint">Drop a saved pupil here</span>
+        </div>
       </div>
     </div>
 
@@ -654,21 +1128,10 @@
         <div id="subText"></div>
         <div class="tiny" id="modeHint"></div>
       </div>
-
-      <div class="sessionCtl">
-        <span class="tag" id="sessionTag">C1S1</span>
-        <label class="tiny" for="sessionSel">Session:</label>
-        <select class="sel" id="sessionSel" aria-label="Select session"></select>
-      </div>
+      <div id="visibleSessionHelp"></div>
     </div>
 
-    <div class="tryHead">
-      <div>1st try</div>
-      <div>2nd try</div>
-      <div>3rd try</div>
-    </div>
-
-    <div class="dateRow">
+    <div class="dateRow bookletDates">
       <div class="dateCell">
         <span class="dateLabel">Date:</span>
         <span class="dateVal" id="date-1"></span>
@@ -685,37 +1148,84 @@
       </div>
     </div>
 
-    <div class="tries" id="tries">
-      <div class="tryCol" data-try="1">
-        <div class="blankArea" id="area-1"></div>
-        <div class="colActions">
-          <button class="btn primary bigMark" type="button" data-marktry="1">MARK (1st try)</button>
-        </div>
+    <div class="sessionSheet">
+      <div class="sessionSide">
+        <div class="sessionSideText" id="sessionSideText">C1S1: Review consonant and vowel graphs</div>
       </div>
 
-      <div class="tryCol" data-try="2">
-        <div class="blankArea" id="area-2"></div>
-        <div class="colActions">
-          <button class="btn primary bigMark" type="button" data-marktry="2">MARK (2nd try)</button>
-        </div>
-      </div>
+      <div class="bookletGrid">
+        <section class="domainPanel readingPanel" aria-labelledby="readingTitle">
+          <div class="domainTitle" id="readingTitle">I Can Read <span class="domainIcon" aria-hidden="true">📖</span></div>
+          <div class="domainTryHead">
+            <div>1st try</div><div>2nd try</div><div>3rd try</div>
+          </div>
+          <div class="domainTryCols" id="readingTries">
+            <div class="domainTryCol" data-label="1st try">
+              <div class="readingArea" id="read-area-1"></div>
+              <div class="readSubmitWrap"><button class="readSubmit" id="read-submit-1" type="button" data-submit-reading="1">SUBMIT READING (1st try)</button></div>
+              <div class="readScore" id="read-score-1">Reading: not marked</div>
+            </div>
+            <div class="domainTryCol" data-label="2nd try">
+              <div class="readingArea" id="read-area-2"></div>
+              <div class="readSubmitWrap"><button class="readSubmit" id="read-submit-2" type="button" data-submit-reading="2">SUBMIT READING (2nd try)</button></div>
+              <div class="readScore" id="read-score-2">Reading: locked</div>
+            </div>
+            <div class="domainTryCol" data-label="3rd try">
+              <div class="readingArea" id="read-area-3"></div>
+              <div class="readSubmitWrap"><button class="readSubmit" id="read-submit-3" type="button" data-submit-reading="3">SUBMIT READING (3rd try)</button></div>
+              <div class="readScore" id="read-score-3">Reading: locked</div>
+            </div>
+          </div>
+          <div class="domainMastery">
+            <div class="starBox starActive" id="readingWorkBox">
+              <div class="star">★</div><div>We’re working on it!</div>
+            </div>
+            <div class="starBox" id="readingMastBox">
+              <div class="star">☆</div><div>I’ve mastered it! ☺</div>
+            </div>
+          </div>
+          <div class="readingHelp">Teacher marks every item with ✓ or ✗, then submits the Reading attempt to lock the results.</div>
+        </section>
 
-      <div class="tryCol" data-try="3">
-        <div class="blankArea" id="area-3"></div>
-        <div class="colActions">
-          <button class="btn primary bigMark" type="button" data-marktry="3">MARK (3rd try)</button>
-        </div>
-      </div>
-    </div>
+        <section class="domainPanel spellingPanel" aria-labelledby="spellingTitle">
+          <div class="domainTitle" id="spellingTitle">I Can Spell <span class="domainIcon" aria-hidden="true">✎</span></div>
+          <div class="domainTryHead">
+            <div>1st try</div><div>2nd try</div><div>3rd try</div>
+          </div>
+          <div class="domainTryCols tries" id="tries">
+            <div class="domainTryCol tryCol" data-try="1" data-label="1st try">
+              <div class="blankArea" id="area-1"></div>
+              <div class="colActions">
+                <button class="btn primary bigMark" type="button" data-marktry="1">MARK (1st try)</button>
+              </div>
+            </div>
 
-    <div class="starBar">
-      <div class="starBox starActive" id="workBox">
-        <div class="star">★</div>
-        <div>We’re working on it!</div>
-      </div>
-      <div class="starBox" id="mastBox">
-        <div class="star">☆</div>
-        <div>I’ve mastered it! ☺</div>
+            <div class="domainTryCol tryCol" data-try="2" data-label="2nd try">
+              <div class="blankArea" id="area-2"></div>
+              <div class="colActions">
+                <button class="btn primary bigMark" type="button" data-marktry="2">MARK (2nd try)</button>
+              </div>
+            </div>
+
+            <div class="domainTryCol tryCol" data-try="3" data-label="3rd try">
+              <div class="blankArea" id="area-3"></div>
+              <div class="colActions">
+                <button class="btn primary bigMark" type="button" data-marktry="3">MARK (3rd try)</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="domainMastery">
+            <div class="starBox starActive" id="workBox">
+              <div class="star">★</div>
+              <div>We’re working on it!</div>
+            </div>
+            <div class="starBox" id="mastBox">
+              <div class="star">☆</div>
+              <div>I’ve mastered it! ☺</div>
+            </div>
+          </div>
+        </section>
       </div>
     </div>
 
@@ -730,6 +1240,7 @@
 
         <span class="pill" id="tryPill">Current: 1st try</span>
         <span class="pill" id="scorePill">Score: —</span>
+        <span class="pill" id="localSavePill">Local record: ready</span>
       </div>
 
       <div class="leftCtl">
@@ -758,11 +1269,40 @@
     <div class="modalHdr">
       <h2>Teacher Panel — PM Records</h2>
       <div class="leftCtl">
+        <button class="btnSmall danger holdReset" id="clearRecordsBtn" type="button" aria-label="Hold for five seconds to fully reset pupil names and PM records">
+          <span id="resetHoldLabel">Hold 5s — Full Reset</span>
+        </button>
         <button class="btnSmall secondary" id="closeTeacher" type="button">Close</button>
       </div>
     </div>
 
     <div class="modalBody">
+      <div class="teacherSection">
+        <h3>Pupil Settings &amp; Quick Selection</h3>
+        <div class="teacherRow">
+          <input class="tInput" id="newStudentName" placeholder="Key in a new pupil name" />
+          <button class="btnSmall good" id="addStudentBtn" type="button">Add Pupil</button>
+          <label class="tiny" for="progressPupilSel">Check progress:</label>
+          <select class="sel" id="progressPupilSel" aria-label="Choose pupil to check progress">
+            <option value="">Choose a pupil</option>
+          </select>
+        </div>
+        <div class="tiny" style="margin-bottom:7px;">
+          Drag a pupil name into the blue box to administer PM, or press <b>Use</b>. Tap the name itself to view that pupil’s progress.
+        </div>
+        <div class="teacherRow" style="align-items:stretch;">
+          <div class="rosterChips" id="rosterChips" aria-label="Saved pupil names"></div>
+          <div class="adminDrop" id="pupilAdminDrop">Drop pupil here to administer PM</div>
+        </div>
+      </div>
+
+      <div class="teacherSection">
+        <h3 id="progressChartTitle">Progress Chart</h3>
+        <div class="progressChartWrap" id="progressChartWrap">
+          <div class="tiny">Choose a pupil above to see progress across all PM sessions.</div>
+        </div>
+      </div>
+
       <div class="teacherRow">
         <input class="tInput" id="teacherSearch" placeholder="Search pupil name (e.g., amber)..." />
         <button class="btnSmall good" id="saveRecordBtn" type="button">Save This Pupil’s Result</button>
@@ -772,8 +1312,6 @@
           Import Records JSON
           <input id="importRecordsFile" type="file" accept="application/json" style="position:absolute; inset:0; opacity:0; cursor:pointer;">
         </label>
-
-        <button class="btnSmall danger" id="clearRecordsBtn" type="button">Clear ALL Records</button>
       </div>
 
       <div class="teacherRow">
@@ -799,6 +1337,7 @@
 
       <div class="tiny" style="margin:8px 0 12px;">
         Stores records in <b>browser local storage</b> (offline). Export regularly as backup.<br>
+        <b>Full Reset:</b> hold the red button for 5 seconds. Releasing early cancels it. It clears all pupil names plus Reading and Spelling records, but keeps audio settings.<br>
         Voice options depend on the browser/device. Audio settings are saved on this browser.<br>
         This version reads in <b>one utterance only</b>: <b>word. sentence. word.</b>
       </div>
@@ -809,17 +1348,19 @@
         </summary>
 
         <div class="tiny" style="margin-top:10px; line-height:1.6; color:#334155;">
-          <div><b>1. Key in pupil name</b> at the top of the page.</div>
+          <div><b>1. Add pupil names</b> in Pupil Settings. Drag a name into the blue box or press <b>Use</b> to administer PM.</div>
           <div><b>2. Choose the session</b> from the session dropdown.</div>
-          <div><b>3. Click “Unlock Audio”</b> once before using the speaker buttons.</div>
-          <div><b>4. Click 🔊</b> beside a word to play the audio in this format: <b>word. sentence. word.</b></div>
+          <div><b>3. For Reading</b>, listen to the pupil and mark every item with <b>✓</b> or <b>✗</b>. Check the selections, then press <b>Submit Reading</b> to lock that attempt.</div>
+          <div><b>4. For Spelling</b>, click “Unlock Audio” once, then click 🔊 beside a word to play <b>word. sentence. word.</b></div>
           <div><b>5. Open Teacher Panel</b> to adjust <b>Voice</b> and <b>Speed</b>. Use <b>Preview Audio</b> to test it.</div>
           <div><b>6. Click “Save Audio Settings”</b> if you want this browser to remember your preferred audio settings.</div>
           <div><b>7. Pupils type their spelling</b>, then click <b>MARK</b> for that try.</div>
           <div><b>8. Unlock 2nd Try / 3rd Try</b> only when needed.</div>
           <div><b>9. Click “Download JSON”</b> to save that pupil’s work. The exported pupil JSON also includes the current audio settings.</div>
           <div><b>10. Click “Upload JSON”</b> on another computer/browser to restore the pupil’s work. If audio settings are found in that JSON, they will also be applied and saved on that browser automatically.</div>
-          <div><b>11. Use “Save This Pupil’s Result”</b> inside Teacher Panel if you want to keep a browser-based teacher record.</div>
+          <div><b>11. Every Reading mark and every marked Spelling try is saved automatically</b> to the pupil’s dated local record. “Save This Pupil’s Result” can still be used manually.</div>
+          <div><b>12. Choose a pupil under “Check progress”</b> to view the progress chart and full word-by-word history.</div>
+          <div><b>13. For a complete local records reset</b>, hold <b>“Hold 5s — Full Reset”</b> until the progress streak reaches the end. Release early to cancel.</div>
         </div>
       </details>
 
@@ -902,6 +1443,112 @@ const SESSION_BANK = {
   C18S1:{title:"C18S1 — Prefix 'mis-'", markingMode:"affix", targets:["mis"], hint:"Marking: only the target prefix must be correct (mis-)."},
   C18S2:{title:"C18S2 — Prefix 'pre-'", markingMode:"affix", targets:["pre"], hint:"Marking: only the target prefix must be correct (pre-)."},
   C18S3:{title:"C18S3 — Suffix '-less'", markingMode:"affix", targets:["less"], hint:"Marking: only the target suffix must be correct (-less)."}
+};
+
+const READING_BANK = {
+  C1S1:{need:23, tries:{
+    1:["a","e","i","o","u","b","c","d","f","g","h","j","k","l","m","n","p","qu","r","s","t","v","w","x","y","z","bag","yes","log"],
+    2:["a","e","i","o","u","b","c","d","f","g","h","j","k","l","m","n","p","qu","r","s","t","v","w","x","y","z","pot","big","dug"],
+    3:["a","e","i","o","u","b","c","d","f","g","h","j","k","l","m","n","p","qu","r","s","t","v","w","x","y","z","bed","lid","mum"]
+  }},
+  C1S2:{need:6, tries:{
+    1:["ch","chop","sh","ship","th (voiced)","than","th (unvoiced)","moth"],
+    2:["ch","such","sh","shot","th (voiced)","this","th (unvoiced)","thin"],
+    3:["ch","chin","sh","rush","th (voiced)","them","th (unvoiced)","thud"]
+  }},
+  C1S3:{need:2, tries:{1:["flat","trip"],2:["frog","slid"],3:["slug","flip"]}},
+
+  C2S1:{need:6, tries:{
+    1:["-ff","bluff","-ll","still","-ss","mass","-zz","fizz"],
+    2:["-ff","puff","-ll","smell","-ss","fuss","-zz","buzz"],
+    3:["-ff","sniff","-ll","tell","-ss","hiss","-zz","frizz"]
+  }},
+  C2S2:{need:2, tries:{1:["-ck","black"],2:["-ck","lock"],3:["-ck","pluck"]}},
+  C2S3:{need:2, tries:{1:["-tch","match"],2:["-tch","sketch"],3:["-tch","snatch"]}},
+
+  C3S1:{need:2, tries:{1:["-dge","edge"],2:["-dge","trudge"],3:["-dge","sledge"]}},
+  C3S2:{need:6, tries:{
+    1:["a-e","e-e","i-e","o-e","u-e","same","theme","cube"],
+    2:["a-e","e-e","i-e","o-e","u-e","poke","tune","quite"],
+    3:["a-e","e-e","i-e","o-e","u-e","spade","dive","note"]
+  }},
+  C3S3:{need:2, tries:{1:["grab","smile"],2:["cross","drove"],3:["drum","stone"]}},
+
+  C4S1:{need:3, tries:{1:["in","back","catfish"],2:["up","not","laptop"],3:["at","sun","hopscotch"]}},
+  C4S2:{need:2, tries:{1:["hi","solo"],2:["so","silo"],3:["she","ego"]}},
+  C4S3:{need:2, tries:{1:["tidbit","fabric"],2:["bandit","napkin"],3:["inside","tennis"]}},
+
+  C5S1:{need:2, tries:{1:["cabin","hotel"],2:["timid","basic"],3:["vanish","music"]}},
+  C5S2:{need:2, tries:{1:["broken","metal"],2:["seven","alone"],3:["common","camel"]}},
+  C5S3:{need:2, tries:{1:["went","item"],2:["just","object"],3:["hand","pancake"]}},
+
+  C6S1:{need:3, tries:{
+    1:["-ble","table","-dle","peddle"],
+    2:["-ble","crumble","-dle","ladle"],
+    3:["-ble","nimble","-dle","handle"]
+  }},
+  C6S2:{need:5, tries:{
+    1:["-ple","apple","-tle","shuttle","-gle","jiggle"],
+    2:["-ple","staple","-tle","title","-gle","boggle"],
+    3:["-ple","simple","-tle","settle","-gle","gaggle"]
+  }},
+  C6S3:{need:3, tries:{1:["ar","dark","or","north"],2:["ar","garden","or","cord"],3:["ar","chart","or","fort"]}},
+
+  C7S1:{need:5, tries:{
+    1:["ir","bird","er","order","ur","burst"],
+    2:["ir","chirp","er","better","ur","turn"],
+    3:["ir","shirt","er","baker","ur","purple"]
+  }},
+  C7S2:{need:3, tries:{1:["y","why","y","happy"],2:["y","dry","y","family"],3:["y","sty","y","thirty"]}},
+  C7S3:{need:2, tries:{1:["plump","starfish"],2:["slept","crispy"],3:["bland","butterfly"]}},
+
+  C8S1:{need:3, tries:{1:["c","icy","g","gem"],2:["c","pencil","g","wage"],3:["c","city","g","gist"]}},
+  C8S2:{need:3, tries:{1:["ay","lay","ai","wait"],2:["ay","tray","ai","paint"],3:["ay","sway","ai","snail"]}},
+  C8S3:{need:2, tries:{1:["circle","explain"],2:["birthday","mercy"],3:["energy","cement"]}},
+
+  C9S1:{need:2, tries:{1:["ee","canteen"],2:["ee","thirteen"],3:["ee","greedy"]}},
+  C9S2:{need:3, tries:{1:["ea","bread","ea","heat"],2:["ea","heavy","ea","each"],3:["ea","deaf","ea","eagle"]}},
+  C9S3:{need:3, tries:{1:["ie","fried","ie","chief"],2:["ie","die","ie","shriek"],3:["ie","tried","ie","shield"]}},
+
+  C10S1:{need:3, tries:{1:["ei","deceit","ei","beige"],2:["ei","receive","ei","abseil"],3:["ei","caffeine","ei","weight"]}},
+  C10S2:{need:3, tries:{1:["ey","grey","ey","turkey"],2:["ey","hey","ey","jersey"],3:["ey","obey","ey","kidney"]}},
+  C10S3:{need:2, tries:{1:["scream","cookie"],2:["sprint","leader"],3:["strict","sleepy"]}},
+
+  C11S1:{need:3, tries:{1:["oa","boat","ow","window"],2:["oa","road","ow","follow"],3:["oa","toast","ow","yellow"]}},
+  C11S2:{need:3, tries:{1:["oo","hook","oo","scooter"],2:["oo","bookshelf","oo","soon"],3:["oo","wood","oo","raccoon"]}},
+  C11S3:{need:5, tries:{
+    1:["ue","blue","ew","grew","ui","fruit"],
+    2:["ue","glue","ew","crew","ui","suitcase"],
+    3:["ue","sue","ew","blew","ui","bruise"]
+  }},
+
+  C12S1:{need:3, tries:{1:["ue","argue","ew","new"],2:["ue","cue","ew","curfew"],3:["ue","Tuesday","ew","chew"]}},
+  C12S2:{need:2, tries:{1:["aw","law"],2:["aw","scrawny"],3:["aw","crawl"]}},
+  C12S3:{need:2, tries:{1:["pursue","pillow"],2:["shampoo","rooster"],3:["mailbox","bedroom"]}},
+
+  C13S1:{need:3, tries:{1:["ou","round","ow","however"],2:["ou","without","ow","crowd"],3:["ou","ground","ow","plow"]}},
+  C13S2:{need:3, tries:{1:["oi","moist","oy","oyster"],2:["oi","choice","oy","cowboy"],3:["oi","join","oy","soy"]}},
+  C13S3:{need:2, tries:{1:["igh","night"],2:["igh","bright"],3:["igh","highlight"]}},
+
+  C14S1:{need:2, tries:{1:["kn","knob"],2:["kn","knee"],3:["kn","knock"]}},
+  C14S2:{need:3, tries:{1:["ng","length","nk","pink"],2:["ng","along","nk","sink"],3:["ng","anything","nk","thank"]}},
+  C14S3:{need:2, tries:{1:["fortnight","cloudy"],2:["daylight","ceiling"],3:["flower","kneepad"]}},
+
+  C15S1:{need:2, tries:{1:["scramble","beyond"],2:["display","feather"],3:["barley","withdraw"]}},
+  C15S2:{need:2, tries:{1:["snowman","cartoon"],2:["rainbow","redeem"],3:["indeed","season"]}},
+  C15S3:{need:2, tries:{1:["penknife","charcoal"],2:["increase","bamboo"],3:["moody","onlooker"]}},
+
+  C16S1:{need:3, tries:{1:["-s","shapes","-es","dishes"],2:["-s","boats","-es","pages"],3:["-s","rings","-es","wishes"]}},
+  C16S2:{need:3, tries:{1:["-ed","filled","jumped","hinted"],2:["-ed","rained","washed","added"],3:["-ed","called","shocked","fasted"]}},
+  C16S3:{need:3, tries:{1:["un-","unable","in-","invalid"],2:["un-","unlock","in-","inaction"],3:["un-","unkind","in-","invisible"]}},
+
+  C17S1:{need:3, tries:{1:["-ing","fighting","-ful","careful"],2:["-ing","wishing","-ful","useful"],3:["-ing","meeting","-ful","hopeful"]}},
+  C17S2:{need:3, tries:{1:["re-","redo","dis-","disown"],2:["re-","replayed","dis-","dislocate"],3:["re-","rebuild","dis-","distrust"]}},
+  C17S3:{need:3, tries:{1:["-er","sweeter","-est","lightest"],2:["-er","faster","-est","weakest"],3:["-er","brighter","-est","slowest"]}},
+
+  C18S1:{need:2, tries:{1:["mis-","mistreat"],2:["mis-","misread"],3:["mis-","misstep"]}},
+  C18S2:{need:2, tries:{1:["pre-","premade"],2:["pre-","preload"],3:["pre-","preset"]}},
+  C18S3:{need:2, tries:{1:["-less","fearless"],2:["-less","useless"],3:["-less","breathless"]}}
 };
 
 const TRIES_BANK = {
@@ -1196,9 +1843,11 @@ const TRIES_BANK = {
 
 let SESSION_INFO = {};
 let TRIES = {};
+let READING = {need:1, tries:{1:[],2:[],3:[]}};
 
 const PASSWORD = "0000";
 const TEACHER_KEY = "PM_TEACHER_RECORDS::v2";
+const ROSTER_KEY = "PM_STUDENT_ROSTER::v1";
 const AUDIO_SETTINGS_KEY = "PM_AUDIO_SETTINGS::v1";
 const DEFAULT_AUDIO_SETTINGS = {
   voice: "auto",
@@ -1206,6 +1855,7 @@ const DEFAULT_AUDIO_SETTINGS = {
 };
 
 const studentName = document.getElementById("studentName");
+const studentNameDrop = document.getElementById("studentNameDrop");
 const soundOn  = document.getElementById("soundOn");
 
 const unlockAudioBtn = document.getElementById("unlockAudioBtn");
@@ -1222,6 +1872,7 @@ const mastBox  = document.getElementById("mastBox");
 
 const tryPill   = document.getElementById("tryPill");
 const scorePill = document.getElementById("scorePill");
+const localSavePill = document.getElementById("localSavePill");
 
 const date1El = document.getElementById("date-1");
 const date2El = document.getElementById("date-2");
@@ -1233,6 +1884,12 @@ const sessionSel = document.getElementById("sessionSel");
 const sessionTag = document.getElementById("sessionTag");
 const subText = document.getElementById("subText");
 const modeHint = document.getElementById("modeHint");
+const cycleTitle = document.getElementById("cycleTitle");
+const cycleBadge = document.getElementById("cycleBadge");
+const sessionSideText = document.getElementById("sessionSideText");
+const visibleSessionHelp = document.getElementById("visibleSessionHelp");
+const readingWorkBox = document.getElementById("readingWorkBox");
+const readingMastBox = document.getElementById("readingMastBox");
 
 const teacherBtn = document.getElementById("teacherBtn");
 const teacherModal = document.getElementById("teacherModal");
@@ -1244,6 +1901,14 @@ const saveRecordBtn = document.getElementById("saveRecordBtn");
 const exportRecordsBtn = document.getElementById("exportRecordsBtn");
 const importRecordsFile = document.getElementById("importRecordsFile");
 const clearRecordsBtn = document.getElementById("clearRecordsBtn");
+const resetHoldLabel = document.getElementById("resetHoldLabel");
+const newStudentName = document.getElementById("newStudentName");
+const addStudentBtn = document.getElementById("addStudentBtn");
+const rosterChips = document.getElementById("rosterChips");
+const pupilAdminDrop = document.getElementById("pupilAdminDrop");
+const progressPupilSel = document.getElementById("progressPupilSel");
+const progressChartTitle = document.getElementById("progressChartTitle");
+const progressChartWrap = document.getElementById("progressChartWrap");
 
 const voiceSel = document.getElementById("voiceSel");
 const speedSel = document.getElementById("speedSel");
@@ -1258,6 +1923,9 @@ let tryUnlocked = {1:true, 2:false, 3:false};
 let marked = {1:false, 2:false, 3:false};
 let tryDate = {1:"", 2:"", 3:""};
 let tryScore = {1:null, 2:null, 3:null};
+let readingMarks = {1:[], 2:[], 3:[]};
+let readingScore = {1:null, 2:null, 3:null};
+let readingSubmitted = {1:false, 2:false, 3:false};
 
 let stateAnswers = {1:["",""], 2:["",""], 3:["",""]};
 let stateMarks   = {1:["",""], 2:["",""], 3:["",""]};
@@ -1266,6 +1934,9 @@ let speechLock = false;
 let activeUtterance = null;
 let ttsPrimed = false;
 let desiredVoiceKey = DEFAULT_AUDIO_SETTINGS.voice;
+let activeRecordId = "";
+let activeRecordStudent = "";
+let activeRecordSession = "";
 
 function loadSavedAudioSettings(){
   try{
@@ -1344,6 +2015,7 @@ function escapeHtml(s){
   })[m]);
 }
 function masteryNeed(n){
+  if(n === 3) return 3;
   return Math.max(1, Math.round(0.8*n));
 }
 function setStar(mastered){
@@ -1362,10 +2034,54 @@ function setStar(mastered){
     if(mStar) mStar.textContent = "☆";
   }
 }
+function setReadingStar(mastered){
+  const wStar = readingWorkBox.querySelector(".star");
+  const mStar = readingMastBox.querySelector(".star");
+  if(mastered){
+    readingWorkBox.classList.remove("starActive");
+    readingMastBox.classList.add("starActive");
+    if(wStar) wStar.textContent = "☆";
+    if(mStar) mStar.textContent = "★";
+  }else{
+    readingMastBox.classList.remove("starActive");
+    readingWorkBox.classList.add("starActive");
+    if(wStar) wStar.textContent = "★";
+    if(mStar) mStar.textContent = "☆";
+  }
+}
+function computeReadingTryScore(t){
+  const items = READING?.tries?.[t] || [];
+  const results = readingMarks[t] || [];
+  const correct = results.filter(x => x === "good").length;
+  const markedCount = results.filter(x => x === "good" || x === "bad").length;
+  const total = items.length;
+  const need = Number(READING?.need || masteryNeed(total));
+  const complete = total > 0 && markedCount === total;
+  const submitted = !!readingSubmitted[t];
+  return {correct, total, need, markedCount, complete, submitted, mastered:complete && submitted && correct >= need};
+}
+function computeReadingMastery(){
+  return [1,2,3].some(t => {
+    const score = readingScore[t] || computeReadingTryScore(t);
+    return !!score?.mastered;
+  });
+}
+function updateCombinedScorePill(t=currentTry){
+  const r = readingScore[t] || computeReadingTryScore(t);
+  const s = tryScore[t];
+  const rText = r && r.markedCount ? `${r.correct}/${r.total}` : "—";
+  const sText = s ? `${s.correct}/${s.total}` : "—";
+  scorePill.innerHTML = `<span class="scoreDomain">Read: <b>${rText}</b></span> <span aria-hidden="true">•</span> <span class="scoreDomain">Spell: <b>${sText}</b></span>`;
+  scorePill.classList.remove("scoreBad","scoreOk");
+  if(r?.complete && s){
+    scorePill.classList.add((r.mastered && s.mastered) ? "scoreOk" : "scoreBad");
+  }
+}
 function setCurrentTry(t){
   currentTry = t;
   const name = (t===1 ? "1st try" : t===2 ? "2nd try" : "3rd try");
   tryPill.textContent = `Current: ${name}`;
+  updateCombinedScorePill(t);
 }
 
 function stopSpeech(){
@@ -1638,6 +2354,123 @@ function resetAudioSettingsToDefault(){
   applyAudioSettings(DEFAULT_AUDIO_SETTINGS, {persist:false});
 }
 
+function readingItemHtml(tryNo, idx, label){
+  const result = readingMarks?.[tryNo]?.[idx] || "";
+  const disabled = !tryUnlocked[tryNo] || !!readingSubmitted[tryNo];
+  return `
+    <div class="readItem" id="read-item-${tryNo}-${idx}">
+      <div class="readItemLabel">${escapeHtml(label)}</div>
+      <div class="readChoice">
+        <button class="readMark good ${result==="good" ? "active" : ""}" type="button"
+                data-read-try="${tryNo}" data-read-idx="${idx}" data-read-result="good"
+                ${disabled ? "disabled" : ""} aria-label="Correct reading" title="Correct reading"
+                aria-pressed="${result==="good"}">✓</button>
+        <button class="readMark bad ${result==="bad" ? "active" : ""}" type="button"
+                data-read-try="${tryNo}" data-read-idx="${idx}" data-read-result="bad"
+                ${disabled ? "disabled" : ""} aria-label="Incorrect reading" title="Incorrect reading"
+                aria-pressed="${result==="bad"}">✗</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderReadingAll(){
+  for(const t of [1,2,3]){
+    const area = document.getElementById(`read-area-${t}`);
+    const items = READING?.tries?.[t] || [];
+    if(area){
+      area.classList.toggle("dense", items.length > 12);
+      area.innerHTML = items.map((label,i)=>readingItemHtml(t,i,label)).join("");
+    }
+
+    const score = computeReadingTryScore(t);
+    readingScore[t] = score;
+    const scoreEl = document.getElementById(`read-score-${t}`);
+    const submitBtn = document.getElementById(`read-submit-${t}`);
+    if(submitBtn){
+      const tryName = t===1 ? "1st" : t===2 ? "2nd" : "3rd";
+      submitBtn.textContent = readingSubmitted[t] ? `READING SUBMITTED ✓` : `SUBMIT READING (${tryName} try)`;
+      submitBtn.disabled = !tryUnlocked[t] || !!readingSubmitted[t];
+      submitBtn.classList.toggle("submitted", !!readingSubmitted[t]);
+    }
+    if(scoreEl){
+      if(!tryUnlocked[t]){
+        scoreEl.textContent = "Reading: locked";
+      }else if(!score.markedCount){
+        scoreEl.textContent = `Reading: 0/${score.total} marked • Need ${score.need}`;
+      }else if(score.complete && !score.submitted){
+        scoreEl.textContent = `Reading: ${score.correct}/${score.total} • Ready to submit`;
+      }else{
+        const status = score.submitted ? (score.mastered ? "Mastered" : "Working") : "In progress";
+        scoreEl.textContent = `Reading: ${score.correct}/${score.total} correct • ${score.markedCount}/${score.total} marked • ${status}`;
+      }
+    }
+  }
+  setReadingStar(computeReadingMastery());
+  updateCombinedScorePill(currentTry);
+}
+
+function markReadingItem(t, idx, result){
+  if(!tryUnlocked[t]){
+    alert("This try is locked. Teacher must unlock it first.");
+    return;
+  }
+  if(!cleanStudentName(studentName.value)){
+    alert("Please key in or select the pupil’s name before recording the reading.");
+    studentName.focus();
+    return;
+  }
+  if(readingSubmitted[t]){
+    alert("This Reading attempt has already been submitted and locked.");
+    return;
+  }
+  const items = READING?.tries?.[t] || [];
+  if(!items[idx]) return;
+  setCurrentTry(t);
+  setDateIfEmpty(t);
+  if(!Array.isArray(readingMarks[t])) readingMarks[t] = new Array(items.length).fill("");
+  readingMarks[t][idx] = result === "good" ? "good" : "bad";
+  readingScore[t] = computeReadingTryScore(t);
+  renderReadingAll();
+  saveCurrentTeacherRecord();
+}
+
+document.addEventListener("click", (e)=>{
+  const btn = e.target.closest("[data-read-result]");
+  if(!btn) return;
+  markReadingItem(+btn.dataset.readTry, +btn.dataset.readIdx, btn.dataset.readResult);
+});
+
+function submitReadingTry(t){
+  if(!tryUnlocked[t]){
+    alert("This try is locked. Teacher must unlock it first.");
+    return;
+  }
+  if(readingSubmitted[t]) return;
+  if(!cleanStudentName(studentName.value)){
+    alert("Please key in or select the pupil’s name before submitting Reading.");
+    studentName.focus();
+    return;
+  }
+  const score = computeReadingTryScore(t);
+  if(!score.complete){
+    alert(`Please mark every Reading item before submitting. ${score.markedCount}/${score.total} have been marked.`);
+    return;
+  }
+  if(!confirm("Submit and lock this Reading attempt? The ✓ and ✗ selections cannot be changed after submission.")) return;
+  readingSubmitted[t] = true;
+  readingScore[t] = computeReadingTryScore(t);
+  renderReadingAll();
+  saveCurrentTeacherRecord();
+  alert("Reading results submitted and locked.");
+}
+
+document.addEventListener("click", (e)=>{
+  const btn = e.target.closest("[data-submit-reading]");
+  if(!btn) return;
+  submitReadingTry(+btn.dataset.submitReading);
+});
+
 function lineHtml(tryNo, idx){
   const id = `t${tryNo}-${idx}`;
   const disabled = !tryUnlocked[tryNo];
@@ -1680,6 +2513,7 @@ function rebuildAll(){
   }
 
   syncAudioUiBusy();
+  renderReadingAll();
 }
 
 document.addEventListener("input", (e)=>{
@@ -1749,6 +2583,7 @@ function unlockTry(t){
     if(spk) spk.disabled = false;
   }
   setCurrentTry(t);
+  renderReadingAll();
   syncAudioUiBusy();
   return true;
 }
@@ -1887,6 +2722,11 @@ function markTry(t){
     return;
   }
   if(marked[t]) return;
+  if(!cleanStudentName(studentName.value)){
+    alert("Please key in or select the pupil’s name before marking. This keeps every word and mistake under the correct pupil.");
+    studentName.focus();
+    return;
+  }
 
   setDateIfEmpty(t);
   captureAnswers();
@@ -1945,11 +2785,7 @@ function markTry(t){
   marked[t] = true;
   tryScore[t] = {correct, total, need, mastered};
 
-  scorePill.textContent = `Score: ${correct}/${total} (Need ${need})`;
-
-  scorePill.classList.remove("scoreBad","scoreOk");
-  if(correct === total) scorePill.classList.add("scoreOk");
-  else scorePill.classList.add("scoreBad");
+  updateCombinedScorePill(t);
 
   setStar(mastered);
 
@@ -1960,6 +2796,7 @@ function markTry(t){
   }
 
   syncAudioUiBusy();
+  saveCurrentTeacherRecord();
 }
 
 document.addEventListener("click", (e)=>{
@@ -1985,6 +2822,7 @@ document.addEventListener("focusin", (e)=>{
 function buildExportJson(){
   captureAnswers();
   const triesOut = {};
+  const readingTriesOut = {};
   for(const t of [1,2,3]){
     triesOut[t] = {
       unlocked: !!tryUnlocked[t],
@@ -1996,10 +2834,19 @@ function buildExportJson(){
       score: tryScore[t] ? {...tryScore[t]} : null,
       markHtml: (stateMarks[t]||[]).slice()
     };
+    const rScore = readingScore[t] || computeReadingTryScore(t);
+    readingTriesOut[t] = {
+      unlocked: !!tryUnlocked[t],
+      date: tryDate[t] || "",
+      items: (READING?.tries?.[t] || []).slice(),
+      results: (readingMarks[t] || []).slice(),
+      submitted: !!readingSubmitted[t],
+      score: rScore ? {...rScore} : null
+    };
   }
 
   return {
-    version: "pm-spelling-auto-mark-v10",
+    version: "pm-reading-spelling-v12",
     exportedAt: new Date().toISOString(),
     sessionKey: sessionSel.value,
     sessionInfo: {...SESSION_INFO},
@@ -2008,7 +2855,11 @@ function buildExportJson(){
       voice: desiredVoiceKey || DEFAULT_AUDIO_SETTINGS.voice,
       speed: String(speedSel?.value || DEFAULT_AUDIO_SETTINGS.speed)
     },
-    tries: triesOut
+    tries: triesOut,
+    reading: {
+      masteryNeed: Number(READING?.need || 1),
+      tries: readingTriesOut
+    }
   };
 }
 
@@ -2040,16 +2891,17 @@ importFile.addEventListener("change", async (e)=>{
     const text = await file.text();
     const data = JSON.parse(text);
 
-    if(!data || !data.version || !String(data.version).startsWith("pm-spelling-auto-mark")){
-      alert("This JSON file is not a valid PM Spelling record.");
+    const importVersion = String(data?.version || "");
+    if(!data || (!importVersion.startsWith("pm-spelling-auto-mark") && !importVersion.startsWith("pm-reading-spelling"))){
+      alert("This JSON file is not a valid PM Reading and Spelling record.");
       importFile.value = "";
       return;
     }
 
     const key = String(data.sessionKey || "");
     if(key && SESSION_BANK[key] && TRIES_BANK[key]){
-      applySession(key, true);
       sessionSel.value = key;
+      applySession(key, true);
     }
 
     studentName.value = (data.studentName || "");
@@ -2073,6 +2925,13 @@ importFile.addEventListener("change", async (e)=>{
       stateMarks[t]   = Array.isArray(td.markHtml) ? td.markHtml.slice(0, len) : new Array(len).fill("");
       marked[t] = !!td.marked;
       tryScore[t] = td.score ? {...td.score} : null;
+
+      const rd = data.reading?.tries?.[t];
+      const rLen = (READING?.tries?.[t] || []).length;
+      readingMarks[t] = Array.isArray(rd?.results) ? rd.results.slice(0, rLen) : new Array(rLen).fill("");
+      while(readingMarks[t].length < rLen) readingMarks[t].push("");
+      readingSubmitted[t] = (typeof rd?.submitted === "boolean") ? rd.submitted : !!rd?.score?.complete;
+      readingScore[t] = rd?.score ? {...rd.score} : computeReadingTryScore(t);
     }
 
     tryUnlocked[1] = true;
@@ -2090,14 +2949,14 @@ importFile.addEventListener("change", async (e)=>{
     if(lastMarkedTry && tryScore[lastMarkedTry]){
       setCurrentTry(lastMarkedTry);
       const s = tryScore[lastMarkedTry];
-      scorePill.textContent = `Score: ${s.correct}/${s.total} (Need ${s.need})`;
-
-      scorePill.classList.remove("scoreBad","scoreOk");
-      if(s.correct === s.total) scorePill.classList.add("scoreOk");
-      else scorePill.classList.add("scoreBad");
-
       setStar(!!s.mastered);
     }
+    renderReadingAll();
+    setReadingStar(computeReadingMastery());
+    updateCombinedScorePill(lastMarkedTry || 1);
+
+    if(cleanStudentName(studentName.value)) ensureRosterContains(studentName.value);
+    if(lastMarkedTry) saveCurrentTeacherRecord();
 
     alert(
       restoredAudio
@@ -2113,12 +2972,15 @@ importFile.addEventListener("change", async (e)=>{
 
 function resetAll(){
   setStar(false);
+  setReadingStar(false);
   scorePill.textContent = "Score: —";
   scorePill.classList.remove("scoreBad","scoreOk");
 
   tryUnlocked = {1:true, 2:false, 3:false};
   marked = {1:false, 2:false, 3:false};
   tryScore = {1:null, 2:null, 3:null};
+  readingScore = {1:null, 2:null, 3:null};
+  readingSubmitted = {1:false, 2:false, 3:false};
 
   tryDate = {1: todayYMD(), 2:"", 3:""};
   renderDates();
@@ -2126,6 +2988,11 @@ function resetAll(){
   const len1 = (TRIES[1]||[]).length, len2 = (TRIES[2]||[]).length, len3 = (TRIES[3]||[]).length;
   stateAnswers = {1:new Array(len1).fill(""), 2:new Array(len2).fill(""), 3:new Array(len3).fill("")};
   stateMarks   = {1:new Array(len1).fill(""), 2:new Array(len2).fill(""), 3:new Array(len3).fill("")};
+  readingMarks = {
+    1:new Array((READING?.tries?.[1]||[]).length).fill(""),
+    2:new Array((READING?.tries?.[2]||[]).length).fill(""),
+    3:new Array((READING?.tries?.[3]||[]).length).fill("")
+  };
 
   rebuildAll();
   setCurrentTry(1);
@@ -2133,7 +3000,10 @@ function resetAll(){
   const first = document.getElementById("in-t1-0");
   if(first) first.focus();
 }
-resetBtn.addEventListener("click", resetAll);
+resetBtn.addEventListener("click", ()=>{
+  resetActiveRecord();
+  resetAll();
+});
 
 function loadTeacherRecords(){
   try{
@@ -2147,6 +3017,244 @@ function loadTeacherRecords(){
 function saveTeacherRecords(arr){
   localStorage.setItem(TEACHER_KEY, JSON.stringify(arr));
 }
+function cleanStudentName(name){
+  return String(name || "").trim().replace(/\s+/g, " ");
+}
+function sameStudent(a, b){
+  return cleanStudentName(a).toLocaleLowerCase() === cleanStudentName(b).toLocaleLowerCase();
+}
+function loadStudentRoster(){
+  try{
+    const raw = localStorage.getItem(ROSTER_KEY);
+    const arr = raw ? JSON.parse(raw) : [];
+    return Array.isArray(arr) ? arr.map(cleanStudentName).filter(Boolean) : [];
+  }catch(_){
+    return [];
+  }
+}
+function saveStudentRoster(names){
+  const unique = [];
+  for(const raw of (Array.isArray(names) ? names : [])){
+    const name = cleanStudentName(raw);
+    if(name && !unique.some(x => sameStudent(x, name))) unique.push(name);
+  }
+  unique.sort((a,b)=>a.localeCompare(b, undefined, {sensitivity:"base", numeric:true}));
+  localStorage.setItem(ROSTER_KEY, JSON.stringify(unique));
+  return unique;
+}
+function ensureRosterContains(name){
+  name = cleanStudentName(name);
+  if(!name) return false;
+  const roster = loadStudentRoster();
+  if(roster.some(x => sameStudent(x, name))) return false;
+  roster.push(name);
+  saveStudentRoster(roster);
+  return true;
+}
+function syncRosterFromRecords(){
+  const roster = loadStudentRoster();
+  for(const rec of loadTeacherRecords()){
+    const name = cleanStudentName(rec?.studentName);
+    if(name && !roster.some(x => sameStudent(x, name))) roster.push(name);
+  }
+  return saveStudentRoster(roster);
+}
+function getRosterName(name){
+  return loadStudentRoster().find(x => sameStudent(x, name)) || "";
+}
+function hasCurrentPupilWork(){
+  captureAnswers();
+  return [1,2,3].some(t =>
+    marked[t]
+    || (stateAnswers[t] || []).some(v => cleanAnswer(v).length > 0)
+    || (readingMarks[t] || []).some(v => v === "good" || v === "bad")
+  );
+}
+function resetActiveRecord(){
+  activeRecordId = "";
+  activeRecordStudent = "";
+  activeRecordSession = "";
+  if(localSavePill){
+    localSavePill.textContent = "Local record: ready";
+    localSavePill.classList.remove("localSaved");
+  }
+}
+function restoreLatestPupilLesson(name){
+  const records = loadTeacherRecords()
+    .filter(r => sameStudent(r.studentName, name))
+    .sort((a,b)=>(a.savedAt||0)-(b.savedAt||0));
+  const rec = records[records.length - 1] || null;
+
+  if(!rec){
+    sessionSel.value = "C1S1";
+    applySession("C1S1", true);
+    studentName.value = name;
+    resetActiveRecord();
+    return;
+  }
+
+  const data = rec.export || null;
+  const key = String(data?.sessionKey || rec.sessionKey || "");
+  if(key && SESSION_BANK[key] && TRIES_BANK[key]){
+    sessionSel.value = key;
+    applySession(key, true);
+  }
+  studentName.value = name;
+
+  if(data?.tries){
+    for(const t of [1,2,3]){
+      const td = data.tries[t];
+      if(!td) continue;
+      tryUnlocked[t] = !!td.unlocked;
+      tryDate[t] = td.date || "";
+      const len = (TRIES[t] || []).length;
+      stateAnswers[t] = Array.isArray(td.responses) ? td.responses.slice(0, len) : new Array(len).fill("");
+      stateMarks[t] = Array.isArray(td.markHtml) ? td.markHtml.slice(0, len) : new Array(len).fill("");
+      while(stateAnswers[t].length < len) stateAnswers[t].push("");
+      while(stateMarks[t].length < len) stateMarks[t].push("");
+      marked[t] = !!td.marked;
+      tryScore[t] = td.score ? {...td.score} : null;
+
+      const rd = data.reading?.tries?.[t];
+      const rLen = (READING?.tries?.[t] || []).length;
+      readingMarks[t] = Array.isArray(rd?.results) ? rd.results.slice(0, rLen) : new Array(rLen).fill("");
+      while(readingMarks[t].length < rLen) readingMarks[t].push("");
+      readingSubmitted[t] = (typeof rd?.submitted === "boolean") ? rd.submitted : !!rd?.score?.complete;
+      readingScore[t] = rd?.score ? {...rd.score} : computeReadingTryScore(t);
+    }
+    tryUnlocked[1] = true;
+    renderDates();
+    rebuildAll();
+
+    let lastTry = 1;
+    for(const t of [1,2,3]) if(marked[t]) lastTry = t;
+    setCurrentTry(lastTry);
+    const s = tryScore[lastTry];
+    if(s){
+      setStar(!!s.mastered);
+    }
+    renderReadingAll();
+    setReadingStar(computeReadingMastery());
+    updateCombinedScorePill(lastTry);
+  }
+
+  activeRecordId = rec.id || safeId();
+  activeRecordStudent = name;
+  activeRecordSession = sessionSel.value;
+  if(localSavePill){
+    localSavePill.textContent = `Loaded last lesson: ${sessionSel.value}`;
+    localSavePill.classList.add("localSaved");
+  }
+}
+function chooseStudentForPM(rawName){
+  const name = cleanStudentName(rawName);
+  if(!name) return;
+  const oldName = cleanStudentName(studentName.value);
+  if(oldName && !sameStudent(oldName, name) && hasCurrentPupilWork()){
+    const ok = confirm(`The current on-screen work belongs to ${oldName}. It has already been saved after marking. Start a fresh PM screen for ${name}?`);
+    if(!ok) return;
+  }
+  ensureRosterContains(name);
+  restoreLatestPupilLesson(getRosterName(name) || name);
+  renderRoster();
+  closeTeacherPanel();
+}
+function renderRoster(){
+  const roster = loadStudentRoster();
+  if(!roster.length){
+    rosterChips.innerHTML = `<span class="tiny">No pupil names saved yet. Add the first pupil above.</span>`;
+  }else{
+    rosterChips.innerHTML = roster.map(name => `
+      <span class="pupilChip" draggable="true" data-pupil="${escapeHtml(name)}" title="Drag to administer PM">
+        <button class="chipUse" type="button" data-roster-action="progress" data-pupil="${escapeHtml(name)}" title="View progress">${escapeHtml(name)}</button>
+        <button class="chipUse" type="button" data-roster-action="use" data-pupil="${escapeHtml(name)}">Use</button>
+        <button class="chipRemove" type="button" data-roster-action="remove" data-pupil="${escapeHtml(name)}" aria-label="Remove ${escapeHtml(name)} from pupil list">×</button>
+      </span>
+    `).join("");
+  }
+
+  const wanted = getRosterName(progressPupilSel.value)
+    || getRosterName(studentName.value)
+    || roster[0]
+    || "";
+  progressPupilSel.innerHTML = `<option value="">Choose a pupil</option>` + roster.map(name =>
+    `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`
+  ).join("");
+  progressPupilSel.value = wanted;
+  renderProgressChart(wanted);
+}
+function latestScoreForRecord(rec){
+  for(const t of [3,2,1]){
+    const score = rec?.export?.tries?.[t]?.score || rec?.tryScore?.[t] || null;
+    if(score) return {tryNo:t, score};
+  }
+  return null;
+}
+function latestReadingScoreForRecord(rec){
+  for(const t of [3,2,1]){
+    const score = rec?.export?.reading?.tries?.[t]?.score || rec?.readingScore?.[t] || null;
+    if(score && (score.markedCount || score.complete)) return {tryNo:t, score};
+  }
+  return null;
+}
+function renderProgressChart(rawName){
+  const name = getRosterName(rawName) || cleanStudentName(rawName);
+  if(!name){
+    progressChartTitle.textContent = "Progress Chart";
+    progressChartWrap.innerHTML = `<div class="tiny">Choose a pupil above to see progress across all PM sessions.</div>`;
+    return;
+  }
+
+  const pupilRecords = loadTeacherRecords()
+    .filter(r => sameStudent(r.studentName, name))
+    .sort((a,b)=>(a.savedAt||0)-(b.savedAt||0));
+  const bySession = new Map();
+  for(const rec of pupilRecords){
+    const key = String(rec.sessionKey || "");
+    if(!bySession.has(key)) bySession.set(key, []);
+    bySession.get(key).push(rec);
+  }
+
+  let rows = "";
+  for(let cycle=1; cycle<=18; cycle++){
+    let cells = "";
+    for(let session=1; session<=3; session++){
+      const key = `C${cycle}S${session}`;
+      const history = bySession.get(key) || [];
+      const rec = history[history.length - 1] || null;
+      if(!rec){
+        cells += `<td class="progressCell empty">—</td>`;
+        continue;
+      }
+      const latest = latestScoreForRecord(rec);
+      const latestReading = latestReadingScoreForRecord(rec);
+      const spellingMastered = (typeof rec.overallSpellingMastered === "boolean")
+        ? rec.overallSpellingMastered
+        : computeSpellingMasteryFromExport(rec.export);
+      const readingMastered = (typeof rec.overallReadingMastered === "boolean")
+        ? rec.overallReadingMastered
+        : computeReadingMasteryFromExport(rec.export);
+      const spellText = latest ? `Try ${latest.tryNo}: ${latest.score.correct}/${latest.score.total}` : "—";
+      const readText = latestReading ? `Try ${latestReading.tryNo}: ${latestReading.score.correct}/${latestReading.score.total}` : "—";
+      cells += `
+        <td class="progressCell" data-record-id="${escapeHtml(rec.id || "")}" title="Open latest word-by-word record">
+          <div><b>Read:</b> ${readingMastered ? `<span class="tagOk">Mastered</span>` : `<span class="tagBad">Working</span>`}</div>
+          <div style="margin-top:4px;"><b>Spell:</b> ${spellingMastered ? `<span class="tagOk">Mastered</span>` : `<span class="tagBad">Working</span>`}</div>
+          <div class="progressMeta"><b>R ${escapeHtml(readText)} • S ${escapeHtml(spellText)}</b><br>${escapeHtml(fmtDate(rec.savedAt || Date.now()))}<br>${history.length} dated record${history.length===1?"":"s"}</div>
+        </td>
+      `;
+    }
+    rows += `<tr><th>Cycle ${cycle}</th>${cells}</tr>`;
+  }
+
+  progressChartTitle.textContent = `${name} — Progress Chart`;
+  progressChartWrap.innerHTML = `
+    <table class="progressTable">
+      <thead><tr><th>Cycle</th><th>Session 1</th><th>Session 2</th><th>Session 3</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+}
 function tag(mastered){
   return mastered ? `<span class="tagOk">Mastered</span>` : `<span class="tagBad">Working</span>`;
 }
@@ -2156,14 +3264,38 @@ function fmtTryScore(s){
   const label = `${s.correct}/${s.total}`;
   return `<span class="${cls}">${label}</span>`;
 }
+function fmtTryPair(readScore, spellScore){
+  const read = readScore
+    ? `<span class="${readScore.mastered ? "tagOk" : "tagBad"}">R ${readScore.correct}/${readScore.total}</span>`
+    : `<span class="tiny">R —</span>`;
+  const spell = spellScore
+    ? `<span class="${spellScore.mastered ? "tagOk" : "tagBad"}">S ${spellScore.correct}/${spellScore.total}</span>`
+    : `<span class="tiny">S —</span>`;
+  return `${read}<br><span style="display:inline-block;height:4px;"></span><br>${spell}`;
+}
 function fmtDate(ts){
   try{ return new Date(ts).toLocaleString(); }catch(_){ return ""; }
 }
 function computeOverallMasteryFromExport(exportObj){
+  const hasReading = !!exportObj?.reading?.tries;
+  const spelling = computeSpellingMasteryFromExport(exportObj);
+  return hasReading ? (spelling && computeReadingMasteryFromExport(exportObj)) : spelling;
+}
+function computeSpellingMasteryFromExport(exportObj){
   try{
     const t1 = exportObj?.tries?.[1]?.score?.mastered;
     const t2 = exportObj?.tries?.[2]?.score?.mastered;
     const t3 = exportObj?.tries?.[3]?.score?.mastered;
+    return !!(t1 || t2 || t3);
+  }catch(_){
+    return false;
+  }
+}
+function computeReadingMasteryFromExport(exportObj){
+  try{
+    const t1 = exportObj?.reading?.tries?.[1]?.score?.mastered;
+    const t2 = exportObj?.reading?.tries?.[2]?.score?.mastered;
+    const t3 = exportObj?.reading?.tries?.[3]?.score?.mastered;
     return !!(t1 || t2 || t3);
   }catch(_){
     return false;
@@ -2198,7 +3330,7 @@ function renderTeacherTable(filterText=""){
           <th style="width:90px;">Try 1</th>
           <th style="width:90px;">Try 2</th>
           <th style="width:90px;">Try 3</th>
-          <th style="width:110px;">Overall</th>
+          <th style="width:150px;">Reading / Spelling</th>
           <th style="width:150px;">Saved</th>
           <th style="width:160px;">Actions</th>
         </tr>
@@ -2217,16 +3349,25 @@ function renderTeacherTable(filterText=""){
     const s1 = r.export?.tries?.[1]?.score || r.tryScore?.[1] || null;
     const s2 = r.export?.tries?.[2]?.score || r.tryScore?.[2] || null;
     const s3 = r.export?.tries?.[3]?.score || r.tryScore?.[3] || null;
+    const rs1 = r.export?.reading?.tries?.[1]?.score || r.readingScore?.[1] || null;
+    const rs2 = r.export?.reading?.tries?.[2]?.score || r.readingScore?.[2] || null;
+    const rs3 = r.export?.reading?.tries?.[3]?.score || r.readingScore?.[3] || null;
+    const readingMastered = (typeof r.overallReadingMastered === "boolean")
+      ? r.overallReadingMastered
+      : computeReadingMasteryFromExport(r.export);
+    const spellingMastered = (typeof r.overallSpellingMastered === "boolean")
+      ? r.overallSpellingMastered
+      : computeSpellingMasteryFromExport(r.export);
 
     html += `
       <tr>
         <td>${escapeHtml(r.studentName||"")}</td>
         <td>${escapeHtml(r.sessionKey||"")}<div class="tiny">${escapeHtml(r.sessionTitle||"")}</div></td>
         <td class="tiny">1: ${escapeHtml(d1)}<br>2: ${escapeHtml(d2)}<br>3: ${escapeHtml(d3)}</td>
-        <td>${fmtTryScore(s1)}</td>
-        <td>${fmtTryScore(s2)}</td>
-        <td>${fmtTryScore(s3)}</td>
-        <td>${tag(overallMastered)}</td>
+        <td>${fmtTryPair(rs1,s1)}</td>
+        <td>${fmtTryPair(rs2,s2)}</td>
+        <td>${fmtTryPair(rs3,s3)}</td>
+        <td><b>Read:</b> ${tag(readingMastered)}<br><span style="display:inline-block;height:5px;"></span><br><b>Spell:</b> ${tag(spellingMastered)}</td>
         <td class="tiny">${escapeHtml(fmtDate(r.savedAt||Date.now()))}</td>
         <td>
           <button class="btnSmall secondary" type="button" data-action="view" data-id="${escapeHtml(r.id||"")}">View Work</button>
@@ -2246,6 +3387,7 @@ function openTeacherPanel(){
   teacherModal.setAttribute("aria-hidden","false");
   teacherSearch.value = "";
   refreshVoice();
+  renderRoster();
   renderTeacherTable("");
 }
 function closeTeacherPanel(){
@@ -2260,6 +3402,91 @@ teacherModal.addEventListener("click", (e)=>{
   if(e.target === teacherModal) closeTeacherPanel();
 });
 teacherSearch.addEventListener("input", ()=>renderTeacherTable(teacherSearch.value));
+progressPupilSel.addEventListener("change", ()=>{
+  const name = progressPupilSel.value;
+  teacherSearch.value = name;
+  renderProgressChart(name);
+  renderTeacherTable(name);
+});
+
+addStudentBtn.addEventListener("click", ()=>{
+  const name = cleanStudentName(newStudentName.value);
+  if(!name){
+    alert("Please key in a pupil name.");
+    newStudentName.focus();
+    return;
+  }
+  const added = ensureRosterContains(name);
+  newStudentName.value = "";
+  renderRoster();
+  progressPupilSel.value = getRosterName(name) || name;
+  progressPupilSel.dispatchEvent(new Event("change"));
+  if(!added) alert("This pupil is already in the saved list.");
+});
+newStudentName.addEventListener("keydown", (e)=>{
+  if(e.key === "Enter"){
+    e.preventDefault();
+    addStudentBtn.click();
+  }
+});
+
+rosterChips.addEventListener("dragstart", (e)=>{
+  const chip = e.target.closest(".pupilChip[data-pupil]");
+  if(!chip) return;
+  e.dataTransfer.setData("text/plain", chip.dataset.pupil || "");
+  e.dataTransfer.effectAllowed = "copy";
+});
+rosterChips.addEventListener("click", (e)=>{
+  const btn = e.target.closest("[data-roster-action]");
+  if(!btn) return;
+  const action = btn.dataset.rosterAction;
+  const name = btn.dataset.pupil || "";
+  if(action === "use"){
+    chooseStudentForPM(name);
+    return;
+  }
+  if(action === "progress"){
+    progressPupilSel.value = getRosterName(name) || name;
+    progressPupilSel.dispatchEvent(new Event("change"));
+    return;
+  }
+  if(action === "remove"){
+    if(!confirm(`Remove ${name} from the saved pupil list? Existing PM records will stay in the chart and JSON backup.`)) return;
+    saveStudentRoster(loadStudentRoster().filter(x => !sameStudent(x, name)));
+    renderRoster();
+  }
+});
+
+for(const zone of [pupilAdminDrop, studentNameDrop]){
+  zone.addEventListener("dragover", (e)=>{
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "copy";
+    zone.classList.add("dragOver");
+  });
+  zone.addEventListener("dragleave", ()=>zone.classList.remove("dragOver"));
+  zone.addEventListener("drop", (e)=>{
+    e.preventDefault();
+    zone.classList.remove("dragOver");
+    chooseStudentForPM(e.dataTransfer.getData("text/plain"));
+  });
+}
+
+progressChartWrap.addEventListener("click", (e)=>{
+  const cell = e.target.closest("[data-record-id]");
+  if(!cell) return;
+  const rec = getRecordById(cell.dataset.recordId);
+  if(rec){
+    renderRecordDetail(rec);
+    recordDetail.scrollIntoView({behavior:"smooth", block:"nearest"});
+  }
+});
+
+studentName.addEventListener("input", ()=>{
+  const current = cleanStudentName(studentName.value);
+  if(activeRecordId && (!sameStudent(current, activeRecordStudent) || sessionSel.value !== activeRecordSession)){
+    resetActiveRecord();
+  }
+});
 
 voiceSel.addEventListener("change", async ()=>{
   desiredVoiceKey = voiceSel.value || DEFAULT_AUDIO_SETTINGS.voice;
@@ -2290,24 +3517,20 @@ resetAudioSettingsBtn.addEventListener("click", ()=>{
   alert("Audio settings reset to default.");
 });
 
-function computeOverallMastery(){
+function computeSpellingMastery(){
   const s1 = tryScore[1]?.mastered;
   const s2 = tryScore[2]?.mastered;
   const s3 = tryScore[3]?.mastered;
   return !!(s1 || s2 || s3);
 }
+function computeOverallMastery(){
+  return computeReadingMastery() && computeSpellingMastery();
+}
 
-saveRecordBtn.addEventListener("click", ()=>{
-  const name = (studentName.value||"").trim();
-  if(!name){
-    alert("Please key in pupil name first.");
-    return;
-  }
-
+function buildCurrentTeacherRecord(name, recordId){
   captureAnswers();
   const exportObj = buildExportJson();
   const infoForExport = exportObj.sessionInfo || SESSION_INFO;
-
   const preview = {1:[],2:[],3:[]};
   for(const t of [1,2,3]){
     const list = (exportObj.tries?.[t]?.words || []);
@@ -2328,11 +3551,9 @@ saveRecordBtn.addEventListener("click", ()=>{
       preview[t].push({expected, response: raw, ok, target: tgHint});
     }
   }
-
-  const recs = loadTeacherRecords();
-  recs.push({
-    version: "pm-teacher-record-v2",
-    id: safeId(),
+  return {
+    version: "pm-teacher-record-v5",
+    id: recordId,
     studentName: name,
     sessionKey: exportObj.sessionKey,
     sessionTitle: exportObj.sessionInfo?.title || "",
@@ -2343,15 +3564,59 @@ saveRecordBtn.addEventListener("click", ()=>{
       2: tryScore[2] ? {...tryScore[2]} : (exportObj.tries?.[2]?.score ? {...exportObj.tries[2].score} : null),
       3: tryScore[3] ? {...tryScore[3]} : (exportObj.tries?.[3]?.score ? {...exportObj.tries[3].score} : null)
     },
+    readingScore: {
+      1: readingScore[1] ? {...readingScore[1]} : null,
+      2: readingScore[2] ? {...readingScore[2]} : null,
+      3: readingScore[3] ? {...readingScore[3]} : null
+    },
+    overallReadingMastered: computeReadingMastery(),
+    overallSpellingMastered: computeSpellingMastery(),
     overallMastered: computeOverallMastery(),
     export: exportObj,
     preview: preview,
     savedAt: Date.now()
-  });
+  };
+}
+
+function saveCurrentTeacherRecord({announce=false} = {}){
+  const name = cleanStudentName(studentName.value);
+  if(!name){
+    if(announce) alert("Please key in or select a pupil name first.");
+    return false;
+  }
+
+  ensureRosterContains(name);
+  const sessionKey = sessionSel.value;
+  if(!activeRecordId || !sameStudent(activeRecordStudent, name) || activeRecordSession !== sessionKey){
+    activeRecordId = safeId();
+    activeRecordStudent = name;
+    activeRecordSession = sessionKey;
+  }
+
+  const rec = buildCurrentTeacherRecord(name, activeRecordId);
+  const recs = loadTeacherRecords();
+  const existingIndex = recs.findIndex(r => String(r.id || "") === activeRecordId);
+  if(existingIndex >= 0) recs[existingIndex] = rec;
+  else recs.push(rec);
 
   saveTeacherRecords(recs);
-  renderTeacherTable(teacherSearch.value);
-  alert("Saved to Teacher Records (including pupil’s work).");
+  if(localSavePill){
+    localSavePill.textContent = `Saved locally: ${new Date(rec.savedAt).toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"})}`;
+    localSavePill.classList.add("localSaved");
+  }
+
+  if(teacherModal.classList.contains("show")){
+    renderRoster();
+    const selected = progressPupilSel.value || name;
+    renderProgressChart(selected);
+    renderTeacherTable(teacherSearch.value);
+  }
+  if(announce) alert("Saved to Teacher Records, including every Reading mark, Spelling response and mistake.");
+  return true;
+}
+
+saveRecordBtn.addEventListener("click", ()=>{
+  saveCurrentTeacherRecord({announce:true});
 });
 
 function getRecordById(id){
@@ -2393,22 +3658,47 @@ function renderRecordDetail(rec){
     const resps = exp?.tries?.[t]?.responses || [];
     const markHtml = exp?.tries?.[t]?.markHtml || [];
     const score = exp?.tries?.[t]?.score || null;
-
-    if(!words.length){
-      return `<div class="tiny">No words found for Try ${t}.</div>`;
-    }
+    const readItems = exp?.reading?.tries?.[t]?.items || [];
+    const readResults = exp?.reading?.tries?.[t]?.results || [];
+    const readScore = exp?.reading?.tries?.[t]?.score || rec.readingScore?.[t] || null;
 
     let head = `
       <div class="tiny" style="margin-bottom:8px;">
         <b>Date:</b> ${escapeHtml((t===1?d1:t===2?d2:d3) || "—")}
         &nbsp;&nbsp;|&nbsp;&nbsp;
-        <b>Score:</b> ${score ? `${score.correct}/${score.total} (Need ${score.need})` : "—"}
+        <b>Reading:</b> ${readScore ? `${readScore.correct}/${readScore.total} (Need ${readScore.need})` : "—"}
+        &nbsp;&nbsp;|&nbsp;&nbsp;
+        <b>Spelling:</b> ${score ? `${score.correct}/${score.total} (Need ${score.need})` : "—"}
         &nbsp;&nbsp;|&nbsp;&nbsp;
         <b>Mode:</b> ${escapeHtml(String(detailSessionInfo.markingMode || rec.markingMode || ""))}
         &nbsp;&nbsp;|&nbsp;&nbsp;
         <b>Overall:</b> ${overall ? "Mastered" : "Working"}
       </div>
     `;
+
+    let readingTable = `<div class="tiny" style="margin:8px 0;"><b>Reading:</b> No reading marks saved for this try.</div>`;
+    if(readItems.length){
+      const readRows = readItems.map((item,i)=>{
+        const result = readResults[i] || "";
+        const display = result === "good"
+          ? `<span class="tagOk" title="Correct reading">✓</span>`
+          : result === "bad"
+            ? `<span class="tagBad" title="Incorrect reading">✗</span>`
+            : `<span class="tiny">Not marked</span>`;
+        return `<tr><td style="width:46px;">${i+1}</td><td>${escapeHtml(item)}</td><td style="width:150px;">${display}</td></tr>`;
+      }).join("");
+      readingTable = `
+        <h4 style="margin:10px 0 6px;">I Can Read</h4>
+        <table class="workTable">
+          <thead><tr><th style="width:46px;">#</th><th>Reading item</th><th style="width:150px;">Teacher mark</th></tr></thead>
+          <tbody>${readRows}</tbody>
+        </table>
+      `;
+    }
+
+    if(!words.length){
+      return head + readingTable + `<div class="tiny" style="margin-top:10px;">No spelling words found for Try ${t}.</div>`;
+    }
 
     let rows = "";
     for(let i=0;i<words.length;i++){
@@ -2446,7 +3736,8 @@ function renderRecordDetail(rec){
       `;
     }
 
-    return head + `
+    return head + readingTable + `
+      <h4 style="margin:14px 0 6px;">I Can Spell</h4>
       <table class="workTable">
         <thead>
           <tr>
@@ -2547,14 +3838,16 @@ recordsWrap.addEventListener("click", (e)=>{
     deleteRecordById(id);
     recordDetail.innerHTML = "";
     renderTeacherTable(teacherSearch.value);
+    renderProgressChart(progressPupilSel.value);
   }
 });
 
 exportRecordsBtn.addEventListener("click", ()=>{
   const recs = loadTeacherRecords();
   const obj = {
-    version: "pm-teacher-records-export-v2",
+    version: "pm-teacher-data-export-v5",
     exportedAt: new Date().toISOString(),
+    pupils: loadStudentRoster(),
     records: recs
   };
   const blob = new Blob([JSON.stringify(obj, null, 2)], {type:"application/json"});
@@ -2576,19 +3869,27 @@ importRecordsFile.addEventListener("change", async (e)=>{
     const text = await file.text();
     const data = JSON.parse(text);
 
+    const okV5 = (data && data.version === "pm-teacher-data-export-v5" && Array.isArray(data.records) && Array.isArray(data.pupils));
+    const okV4 = (data && data.version === "pm-teacher-data-export-v4" && Array.isArray(data.records) && Array.isArray(data.pupils));
+    const okV3 = (data && data.version === "pm-teacher-data-export-v3" && Array.isArray(data.records) && Array.isArray(data.pupils));
     const okV2 = (data && data.version === "pm-teacher-records-export-v2" && Array.isArray(data.records));
     const okV1 = (data && data.version === "pm-teacher-records-export-v1" && Array.isArray(data.records));
 
-    if(!okV2 && !okV1){
+    if(!okV5 && !okV4 && !okV3 && !okV2 && !okV1){
       alert("Not a valid Teacher Records JSON.");
       importRecordsFile.value = "";
       return;
     }
 
-    saveTeacherRecords(data.records);
+    const importedRecords = data.records.map(r => ({...r, id:r.id || safeId()}));
+    saveTeacherRecords(importedRecords);
+    if(okV5 || okV4 || okV3) saveStudentRoster(data.pupils);
+    else saveStudentRoster(importedRecords.map(r => r.studentName));
+    resetActiveRecord();
+    renderRoster();
     renderTeacherTable(teacherSearch.value);
     recordDetail.innerHTML = "";
-    alert("Teacher records imported.");
+    alert("Pupil list and full word-by-word teacher records imported.");
   }catch(err){
     alert("Failed to import. File may be corrupted.");
   }finally{
@@ -2596,35 +3897,125 @@ importRecordsFile.addEventListener("change", async (e)=>{
   }
 });
 
-clearRecordsBtn.addEventListener("click", ()=>{
-  if(!confirm("Clear ALL teacher records on this browser? This cannot be undone.")) return;
+const FULL_RESET_HOLD_MS = 5000;
+let fullResetTimer = null;
+let fullResetTicker = null;
+let fullResetStartedAt = 0;
+let fullResetDone = false;
+
+function resetFullResetButton(){
+  clearTimeout(fullResetTimer);
+  clearInterval(fullResetTicker);
+  fullResetTimer = null;
+  fullResetTicker = null;
+  fullResetStartedAt = 0;
+  clearRecordsBtn.classList.remove("holding");
+  clearRecordsBtn.style.setProperty("--hold-progress", "0%");
+  resetHoldLabel.textContent = "Hold 5s — Full Reset";
+}
+
+function performFullRecordsReset(){
   saveTeacherRecords([]);
+  saveStudentRoster([]);
+  studentName.value = "";
+  resetActiveRecord();
   recordDetail.innerHTML = "";
-  renderTeacherTable(teacherSearch.value);
+  teacherSearch.value = "";
+  sessionSel.value = "C1S1";
+  applySession("C1S1", true);
+  studentName.value = "";
+  renderRoster();
+  renderTeacherTable("");
+  renderProgressChart("");
+  alert("Full reset complete. All locally saved pupil names, Reading records and Spelling records have been cleared. Audio settings were kept.");
+}
+
+function updateFullResetStreak(){
+  const elapsed = Math.min(FULL_RESET_HOLD_MS, Date.now() - fullResetStartedAt);
+  const progress = Math.max(0, (elapsed / FULL_RESET_HOLD_MS) * 100);
+  const remaining = Math.max(0, (FULL_RESET_HOLD_MS - elapsed) / 1000);
+  clearRecordsBtn.style.setProperty("--hold-progress", `${progress}%`);
+  resetHoldLabel.textContent = remaining > 0
+    ? `Keep holding… ${remaining.toFixed(1)}s`
+    : "Resetting…";
+}
+
+function startFullResetHold(e){
+  if(e) e.preventDefault();
+  if(fullResetTimer) return;
+  fullResetDone = false;
+  fullResetStartedAt = Date.now();
+  clearRecordsBtn.classList.add("holding");
+  updateFullResetStreak();
+  fullResetTicker = setInterval(updateFullResetStreak, 80);
+  fullResetTimer = setTimeout(()=>{
+    fullResetDone = true;
+    clearTimeout(fullResetTimer);
+    clearInterval(fullResetTicker);
+    fullResetTimer = null;
+    fullResetTicker = null;
+    clearRecordsBtn.style.setProperty("--hold-progress", "100%");
+    resetHoldLabel.textContent = "Resetting…";
+    performFullRecordsReset();
+    setTimeout(resetFullResetButton, 350);
+  }, FULL_RESET_HOLD_MS);
+}
+
+function cancelFullResetHold(e){
+  if(e) e.preventDefault();
+  if(fullResetDone) return;
+  resetFullResetButton();
+}
+
+clearRecordsBtn.addEventListener("click", e=>e.preventDefault());
+clearRecordsBtn.addEventListener("pointerdown", startFullResetHold);
+clearRecordsBtn.addEventListener("pointerup", cancelFullResetHold);
+clearRecordsBtn.addEventListener("pointerleave", cancelFullResetHold);
+clearRecordsBtn.addEventListener("pointercancel", cancelFullResetHold);
+clearRecordsBtn.addEventListener("contextmenu", e=>e.preventDefault());
+clearRecordsBtn.addEventListener("keydown", e=>{
+  if((e.key === " " || e.key === "Enter") && !e.repeat) startFullResetHold(e);
 });
+clearRecordsBtn.addEventListener("keyup", e=>{
+  if(e.key === " " || e.key === "Enter") cancelFullResetHold(e);
+});
+clearRecordsBtn.addEventListener("blur", cancelFullResetHold);
 
 function renderSessionHeader(){
   const key = sessionSel.value;
+  const match = key.match(/^C(\d+)S(\d+)$/);
+  const cycle = match ? Number(match[1]) : 1;
   sessionTag.textContent = key;
+  cycleTitle.textContent = `Cycle ${cycle}`;
+  cycleBadge.textContent = `Cycle ${cycle} PM`;
+  const shortTitle = SESSION_INFO.title.replace(/^C\d+S\d+\s—\s?/, "");
+  sessionSideText.textContent = `${key}: ${shortTitle}`;
   subText.innerHTML = `<b>${escapeHtml(key)}:</b> ${escapeHtml(SESSION_INFO.title.replace(/^C\d+S\d+\s—\s?/, ""))}. Mastery is <b>about 80%</b>.`;
   modeHint.textContent = SESSION_INFO.hint || "";
+  visibleSessionHelp.innerHTML = `<b>${escapeHtml(shortTitle)}</b> &nbsp;•&nbsp; Reading mastery: <b>${Number(READING?.need||1)}/${(READING?.tries?.[1]||[]).length}</b> &nbsp;•&nbsp; Spelling is marked automatically.`;
 }
 
 function applySession(key, silent){
   const info = SESSION_BANK[key];
   const pack = TRIES_BANK[key];
-  if(!info || !pack) return;
+  const readingPack = READING_BANK[key];
+  if(!info || !pack || !readingPack) return;
 
+  resetActiveRecord();
   SESSION_INFO = {...info};
   TRIES = JSON.parse(JSON.stringify(pack));
+  READING = JSON.parse(JSON.stringify(readingPack));
 
   setStar(false);
+  setReadingStar(false);
   scorePill.textContent = "Score: —";
   scorePill.classList.remove("scoreBad","scoreOk");
 
   tryUnlocked = {1:true, 2:false, 3:false};
   marked = {1:false, 2:false, 3:false};
   tryScore = {1:null, 2:null, 3:null};
+  readingScore = {1:null, 2:null, 3:null};
+  readingSubmitted = {1:false, 2:false, 3:false};
 
   tryDate = {1: todayYMD(), 2:"", 3:""};
   renderDates();
@@ -2632,6 +4023,11 @@ function applySession(key, silent){
   const len1 = (TRIES[1]||[]).length, len2 = (TRIES[2]||[]).length, len3 = (TRIES[3]||[]).length;
   stateAnswers = {1:new Array(len1).fill(""), 2:new Array(len2).fill(""), 3:new Array(len3).fill("")};
   stateMarks   = {1:new Array(len1).fill(""), 2:new Array(len2).fill(""), 3:new Array(len3).fill("")};
+  readingMarks = {
+    1:new Array((READING.tries[1]||[]).length).fill(""),
+    2:new Array((READING.tries[2]||[]).length).fill(""),
+    3:new Array((READING.tries[3]||[]).length).fill("")
+  };
 
   renderSessionHeader();
   rebuildAll();
@@ -2645,7 +4041,7 @@ function applySession(key, silent){
 
 sessionSel.addEventListener("change", ()=>{
   const key = sessionSel.value;
-  if(marked[1] || marked[2] || marked[3] || (cleanAnswer(studentName.value).length>0)){
+  if(hasCurrentPupilWork()){
     const ok = confirm("Switching session will clear the current pupil’s work on-screen. Continue?");
     if(!ok){
       sessionSel.value = Object.keys(SESSION_BANK).includes(sessionTag.textContent) ? sessionTag.textContent : "C1S1";
@@ -2671,7 +4067,9 @@ sessionSel.addEventListener("change", ()=>{
 
   sessionSel.value = "C1S1";
   applySession("C1S1", true);
+  if(localStorage.getItem(ROSTER_KEY) === null) syncRosterFromRecords();
   refreshVoice();
+  setTimeout(openTeacherPanel, 120);
 })();
 </script>
 </body>

@@ -129,7 +129,10 @@
       font-weight:900;
       font-size:16px;
       outline:none;
+      background:#fff;
+      cursor:pointer;
     }
+    .nameInput:disabled{background:#f1f5f9; color:#64748b; cursor:not-allowed;}
     .nameDrop{
       display:flex;
       align-items:center;
@@ -1117,7 +1120,9 @@
       <div class="nameBox">
         <span>Name:</span>
         <div class="nameDrop" id="studentNameDrop">
-          <input class="nameInput" id="studentName" placeholder="Teacher to key in or select pupil" />
+          <select class="nameInput" id="studentName" aria-label="Choose a saved pupil to administer PM">
+            <option value="">Add pupils in Teacher Panel</option>
+          </select>
           <span class="dropHint">Drop a saved pupil here</span>
         </div>
       </div>
@@ -1355,7 +1360,7 @@
         </summary>
 
         <div class="tiny" style="margin-top:10px; line-height:1.6; color:#334155;">
-          <div><b>1. Add pupil names</b> in Pupil Settings. Drag a name into the blue box or press <b>Use</b> to administer PM.</div>
+          <div><b>1. Add pupil names</b> in Pupil Settings. On the main PM screen, use the <b>Name dropdown</b> to move quickly between saved pupils. You may also drag a name into the blue box or press <b>Use</b>.</div>
           <div><b>2. Choose the session</b> from the session dropdown.</div>
           <div><b>3. For Reading</b>, listen to the pupil and mark every item with <b>✓</b> or <b>✗</b>. Check the selections, then press <b>Submit Reading</b> to lock that attempt.</div>
           <div><b>4. For Spelling</b>, click “Unlock Audio” once, then click 🔊 beside a word to play <b>word. sentence. word.</b></div>
@@ -2915,7 +2920,9 @@ importFile.addEventListener("change", async (e)=>{
       applySession(key, true);
     }
 
-    studentName.value = (data.studentName || "");
+    const importedPupilName = cleanStudentName(data.studentName || "");
+    if(importedPupilName) ensureRosterContains(importedPupilName);
+    setMainPupilSelection(importedPupilName);
 
     let restoredAudio = false;
     if(data.audioSettings){
@@ -3073,6 +3080,25 @@ function syncRosterFromRecords(){
 function getRosterName(name){
   return loadStudentRoster().find(x => sameStudent(x, name)) || "";
 }
+function renderMainPupilDropdown(preferredName=""){
+  const roster = loadStudentRoster();
+  const wanted = roster.find(name => sameStudent(name, preferredName))
+    || roster.find(name => sameStudent(name, studentName.dataset.selectedPupil))
+    || "";
+  const emptyLabel = roster.length ? "Choose a saved pupil" : "Add pupils in Teacher Panel";
+  studentName.innerHTML = `<option value="" ${roster.length ? "disabled" : ""}>${emptyLabel}</option>` + roster.map(name =>
+    `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`
+  ).join("");
+  studentName.disabled = !roster.length;
+  studentName.value = wanted;
+  studentName.dataset.selectedPupil = wanted;
+}
+function setMainPupilSelection(name){
+  const savedName = getRosterName(name) || cleanStudentName(name);
+  renderMainPupilDropdown(savedName);
+  studentName.value = getRosterName(savedName) || "";
+  studentName.dataset.selectedPupil = studentName.value;
+}
 function hasCurrentPupilWork(){
   captureAnswers();
   return [1,2,3].some(t =>
@@ -3099,7 +3125,7 @@ function restoreLatestPupilLesson(name){
   if(!rec){
     sessionSel.value = "C1S1";
     applySession("C1S1", true);
-    studentName.value = name;
+    setMainPupilSelection(name);
     resetActiveRecord();
     return;
   }
@@ -3110,7 +3136,7 @@ function restoreLatestPupilLesson(name){
     sessionSel.value = key;
     applySession(key, true);
   }
-  studentName.value = name;
+  setMainPupilSelection(name);
 
   if(data?.tries){
     for(const t of [1,2,3]){
@@ -3160,18 +3186,23 @@ function restoreLatestPupilLesson(name){
 function chooseStudentForPM(rawName){
   const name = cleanStudentName(rawName);
   if(!name) return;
-  const oldName = cleanStudentName(studentName.value);
+  const oldName = cleanStudentName(studentName.dataset.selectedPupil || activeRecordStudent);
   if(oldName && !sameStudent(oldName, name) && hasCurrentPupilWork()){
     const ok = confirm(`The current on-screen work belongs to ${oldName}. It has already been saved after marking. Start a fresh PM screen for ${name}?`);
-    if(!ok) return;
+    if(!ok){
+      setMainPupilSelection(oldName);
+      return;
+    }
   }
   ensureRosterContains(name);
+  setMainPupilSelection(getRosterName(name) || name);
   restoreLatestPupilLesson(getRosterName(name) || name);
   renderRoster();
   closeTeacherPanel();
 }
 function renderRoster(){
   const roster = loadStudentRoster();
+  renderMainPupilDropdown(studentName.value || studentName.dataset.selectedPupil);
   if(!roster.length){
     rosterChips.innerHTML = `<span class="tiny">No pupil names saved yet. Add the first pupil above.</span>`;
   }else{
@@ -3514,11 +3545,10 @@ progressChartWrap.addEventListener("click", (e)=>{
   }
 });
 
-studentName.addEventListener("input", ()=>{
-  const current = cleanStudentName(studentName.value);
-  if(activeRecordId && (!sameStudent(current, activeRecordStudent) || sessionSel.value !== activeRecordSession)){
-    resetActiveRecord();
-  }
+studentName.addEventListener("change", ()=>{
+  const selected = cleanStudentName(studentName.value);
+  if(!selected) return;
+  chooseStudentForPM(selected);
 });
 
 voiceSel.addEventListener("change", async ()=>{
@@ -4096,6 +4126,7 @@ sessionSel.addEventListener("change", ()=>{
   sessionSel.value = "C1S1";
   applySession("C1S1", true);
   if(localStorage.getItem(ROSTER_KEY) === null) syncRosterFromRecords();
+  renderRoster();
   refreshVoice();
   setTimeout(openTeacherPanel, 120);
 })();

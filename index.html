@@ -1282,13 +1282,13 @@
         <div class="teacherRow">
           <input class="tInput" id="newStudentName" placeholder="Key in a new pupil name" />
           <button class="btnSmall good" id="addStudentBtn" type="button">Add Pupil</button>
-          <label class="tiny" for="progressPupilSel">Check progress:</label>
-          <select class="sel" id="progressPupilSel" aria-label="Choose pupil to check progress">
+          <label class="tiny" for="progressPupilSel"><b>View pupil record:</b></label>
+          <select class="sel" id="progressPupilSel" aria-label="Choose pupil to view progress and dated records">
             <option value="">Choose a pupil</option>
           </select>
         </div>
         <div class="tiny" style="margin-bottom:7px;">
-          Drag a pupil name into the blue box to administer PM, or press <b>Use</b>. Tap the name itself to view that pupil’s progress.
+          Drag a pupil name into the blue box to administer PM, or press <b>Use</b>. Tap the pupil’s name to view progress and dated records.
         </div>
         <div class="teacherRow" style="align-items:stretch;">
           <div class="rosterChips" id="rosterChips" aria-label="Saved pupil names"></div>
@@ -1303,36 +1303,43 @@
         </div>
       </div>
 
-      <div class="teacherRow">
-        <input class="tInput" id="teacherSearch" placeholder="Search pupil name (e.g., amber)..." />
-        <button class="btnSmall good" id="saveRecordBtn" type="button">Save This Pupil’s Result</button>
-        <button class="btnSmall secondary" id="exportRecordsBtn" type="button">Export Records JSON</button>
+      <div class="teacherSection">
+        <h3>All-Pupil Backup</h3>
+        <div class="tiny" style="margin-bottom:9px;">
+          Reading and Spelling work is saved automatically to the selected pupil’s local record.
+          <b>Export</b> downloads one backup containing the full pupil list and every dated record.
+          <b>Import</b> restores that complete backup and replaces the pupil list and records currently stored in this browser.
+        </div>
+        <div class="teacherRow" style="margin-bottom:0;">
+          <button class="btnSmall secondary" id="exportRecordsBtn" type="button">Export All Records JSON</button>
 
-        <label class="btnSmall secondary" style="position:relative; overflow:hidden;">
-          Import Records JSON
-          <input id="importRecordsFile" type="file" accept="application/json" style="position:absolute; inset:0; opacity:0; cursor:pointer;">
-        </label>
+          <label class="btnSmall secondary" style="position:relative; overflow:hidden;">
+            Import All Records JSON
+            <input id="importRecordsFile" type="file" accept="application/json" style="position:absolute; inset:0; opacity:0; cursor:pointer;">
+          </label>
+        </div>
       </div>
 
-      <div class="teacherRow">
-        <span class="tiny"><b>Audio Settings:</b></span>
+      <div class="teacherSection">
+        <h3>Audio Settings</h3>
+        <div class="teacherRow" style="margin-bottom:0;">
+          <label class="tiny" for="voiceSel">Voice:</label>
+          <select class="sel" id="voiceSel" aria-label="Select voice">
+            <option value="auto">Auto (Recommended)</option>
+          </select>
 
-        <label class="tiny" for="voiceSel">Voice:</label>
-        <select class="sel" id="voiceSel" aria-label="Select voice">
-          <option value="auto">Auto (Recommended)</option>
-        </select>
+          <label class="tiny" for="speedSel">Speed:</label>
+          <select class="sel" id="speedSel" aria-label="Select speed">
+            <option value="0.55">Very Slow</option>
+            <option value="0.65" selected>Slow</option>
+            <option value="0.75">Normal-Slow</option>
+            <option value="0.85">Normal</option>
+          </select>
 
-        <label class="tiny" for="speedSel">Speed:</label>
-        <select class="sel" id="speedSel" aria-label="Select speed">
-          <option value="0.55">Very Slow</option>
-          <option value="0.65" selected>Slow</option>
-          <option value="0.75">Normal-Slow</option>
-          <option value="0.85">Normal</option>
-        </select>
-
-        <button class="btnSmall secondary" id="previewAudioBtn" type="button">Preview Audio</button>
-        <button class="btnSmall good" id="saveAudioSettingsBtn" type="button">Save Audio Settings</button>
-        <button class="btnSmall secondary" id="resetAudioSettingsBtn" type="button">Reset Audio Settings</button>
+          <button class="btnSmall secondary" id="previewAudioBtn" type="button">Preview Audio</button>
+          <button class="btnSmall good" id="saveAudioSettingsBtn" type="button">Save Audio Settings</button>
+          <button class="btnSmall secondary" id="resetAudioSettingsBtn" type="button">Reset Audio Settings</button>
+        </div>
       </div>
 
       <div class="tiny" style="margin:8px 0 12px;">
@@ -1356,16 +1363,21 @@
           <div><b>6. Click “Save Audio Settings”</b> if you want this browser to remember your preferred audio settings.</div>
           <div><b>7. Pupils type their spelling</b>, then click <b>MARK</b> for that try.</div>
           <div><b>8. Unlock 2nd Try / 3rd Try</b> only when needed.</div>
-          <div><b>9. Click “Download JSON”</b> to save that pupil’s work. The exported pupil JSON also includes the current audio settings.</div>
-          <div><b>10. Click “Upload JSON”</b> on another computer/browser to restore the pupil’s work. If audio settings are found in that JSON, they will also be applied and saved on that browser automatically.</div>
-          <div><b>11. Every Reading mark and every marked Spelling try is saved automatically</b> to the pupil’s dated local record. “Save This Pupil’s Result” can still be used manually.</div>
-          <div><b>12. Choose a pupil under “Check progress”</b> to view the progress chart and full word-by-word history.</div>
-          <div><b>13. For a complete local records reset</b>, hold <b>“Hold 5s — Full Reset”</b> until the progress streak reaches the end. Release early to cancel.</div>
+          <div><b>9. “Download JSON” on the main page</b> exports the current pupil’s work, including Reading, Spelling and the current audio settings.</div>
+          <div><b>10. “Upload JSON” on the main page</b> restores one pupil’s exported work on this or another computer/browser. Included audio settings are also applied.</div>
+          <div><b>11. “Export All Records JSON” in the Teacher Panel</b> downloads one complete class backup containing the saved pupil list and every pupil’s dated Reading and Spelling records.</div>
+          <div><b>12. “Import All Records JSON” in the Teacher Panel</b> restores a complete class backup. It replaces the pupil list and records currently stored in this browser, so export a backup first if those records are still needed.</div>
+          <div><b>13. Every Reading mark and every marked Spelling try is saved automatically</b> to the pupil’s dated local record.</div>
+          <div><b>14. Choose a pupil under “View pupil record”</b> to view the progress chart and full word-by-word history.</div>
+          <div><b>15. For a complete local records reset</b>, hold <b>“Hold 5s — Full Reset”</b> until the progress streak reaches the end. Release early to cancel.</div>
         </div>
       </details>
 
-      <div id="recordsWrap"></div>
-      <div id="recordDetail"></div>
+      <div class="teacherSection">
+        <h3 id="recordHistoryTitle">Dated Records</h3>
+        <div id="recordsWrap"></div>
+        <div id="recordDetail"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -1894,10 +1906,9 @@ const readingMastBox = document.getElementById("readingMastBox");
 const teacherBtn = document.getElementById("teacherBtn");
 const teacherModal = document.getElementById("teacherModal");
 const closeTeacher = document.getElementById("closeTeacher");
-const teacherSearch = document.getElementById("teacherSearch");
 const recordsWrap = document.getElementById("recordsWrap");
 const recordDetail = document.getElementById("recordDetail");
-const saveRecordBtn = document.getElementById("saveRecordBtn");
+const recordHistoryTitle = document.getElementById("recordHistoryTitle");
 const exportRecordsBtn = document.getElementById("exportRecordsBtn");
 const importRecordsFile = document.getElementById("importRecordsFile");
 const clearRecordsBtn = document.getElementById("clearRecordsBtn");
@@ -3173,11 +3184,19 @@ function renderRoster(){
     `).join("");
   }
 
-  const wanted = getRosterName(progressPupilSel.value)
-    || getRosterName(studentName.value)
-    || roster[0]
+  const recordNames = loadTeacherRecords()
+    .map(r => cleanStudentName(r.studentName))
+    .filter(Boolean);
+  const allRecordNames = [...roster];
+  for(const name of recordNames){
+    if(!allRecordNames.some(existing => sameStudent(existing, name))) allRecordNames.push(name);
+  }
+
+  const wanted = allRecordNames.find(name => sameStudent(name, progressPupilSel.value))
+    || allRecordNames.find(name => sameStudent(name, studentName.value))
+    || allRecordNames[0]
     || "";
-  progressPupilSel.innerHTML = `<option value="">Choose a pupil</option>` + roster.map(name =>
+  progressPupilSel.innerHTML = `<option value="">Choose a pupil</option>` + allRecordNames.map(name =>
     `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`
   ).join("");
   progressPupilSel.value = wanted;
@@ -3318,18 +3337,22 @@ function safeId(){
   return "r_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2,8);
 }
 
-function renderTeacherTable(filterText=""){
-  const q = String(filterText||"").trim().toLowerCase();
+function renderTeacherTable(pupilName=""){
+  const selectedName = cleanStudentName(pupilName);
+  recordHistoryTitle.textContent = selectedName ? `${selectedName} — Dated Records` : "Dated Records";
+  if(!selectedName){
+    recordDetail.innerHTML = "";
+    recordsWrap.innerHTML = `<div class="tiny">Choose a pupil above to view dated records.</div>`;
+    return;
+  }
+
   const recs = loadTeacherRecords().slice().reverse();
-  const rows = recs.filter(r=>{
-    if(!q) return true;
-    return String(r.studentName||"").toLowerCase().includes(q);
-  });
+  const rows = recs.filter(r => sameStudent(r.studentName, selectedName));
 
   recordDetail.innerHTML = "";
 
   if(!rows.length){
-    recordsWrap.innerHTML = `<div class="tiny">No records yet.</div>`;
+    recordsWrap.innerHTML = `<div class="tiny">No dated records saved for this pupil yet.</div>`;
     return;
   }
 
@@ -3398,10 +3421,9 @@ function openTeacherPanel(){
   if(!askPassword()) return;
   teacherModal.classList.add("show");
   teacherModal.setAttribute("aria-hidden","false");
-  teacherSearch.value = "";
   refreshVoice();
   renderRoster();
-  renderTeacherTable("");
+  renderTeacherTable(progressPupilSel.value);
 }
 function closeTeacherPanel(){
   teacherModal.classList.remove("show");
@@ -3414,10 +3436,8 @@ closeTeacher.addEventListener("click", closeTeacherPanel);
 teacherModal.addEventListener("click", (e)=>{
   if(e.target === teacherModal) closeTeacherPanel();
 });
-teacherSearch.addEventListener("input", ()=>renderTeacherTable(teacherSearch.value));
 progressPupilSel.addEventListener("change", ()=>{
   const name = progressPupilSel.value;
-  teacherSearch.value = name;
   renderProgressChart(name);
   renderTeacherTable(name);
 });
@@ -3622,15 +3642,11 @@ function saveCurrentTeacherRecord({announce=false} = {}){
     renderRoster();
     const selected = progressPupilSel.value || name;
     renderProgressChart(selected);
-    renderTeacherTable(teacherSearch.value);
+    renderTeacherTable(selected);
   }
   if(announce) alert("Saved to Teacher Records, including every Reading mark, Spelling response and mistake.");
   return true;
 }
-
-saveRecordBtn.addEventListener("click", ()=>{
-  saveCurrentTeacherRecord({announce:true});
-});
 
 function getRecordById(id){
   const recs = loadTeacherRecords();
@@ -3840,7 +3856,7 @@ recordsWrap.addEventListener("click", (e)=>{
     const rec = getRecordById(id);
     if(!rec){
       alert("Record not found (maybe deleted).");
-      renderTeacherTable(teacherSearch.value);
+      renderTeacherTable(progressPupilSel.value);
       return;
     }
     renderRecordDetail(rec);
@@ -3850,7 +3866,7 @@ recordsWrap.addEventListener("click", (e)=>{
     if(!confirm("Delete this record? This cannot be undone.")) return;
     deleteRecordById(id);
     recordDetail.innerHTML = "";
-    renderTeacherTable(teacherSearch.value);
+    renderTeacherTable(progressPupilSel.value);
     renderProgressChart(progressPupilSel.value);
   }
 });
@@ -3900,7 +3916,7 @@ importRecordsFile.addEventListener("change", async (e)=>{
     else saveStudentRoster(importedRecords.map(r => r.studentName));
     resetActiveRecord();
     renderRoster();
-    renderTeacherTable(teacherSearch.value);
+    renderTeacherTable(progressPupilSel.value);
     recordDetail.innerHTML = "";
     alert("Pupil list and full word-by-word teacher records imported.");
   }catch(err){
@@ -3933,7 +3949,6 @@ function performFullRecordsReset(){
   studentName.value = "";
   resetActiveRecord();
   recordDetail.innerHTML = "";
-  teacherSearch.value = "";
   sessionSel.value = "C1S1";
   applySession("C1S1", true);
   studentName.value = "";

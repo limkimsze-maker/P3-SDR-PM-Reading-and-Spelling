@@ -3190,10 +3190,20 @@ function latestScoreForRecord(rec){
   }
   return null;
 }
+function readingScoreWasSubmitted(rec, t, score){
+  const readingTry = rec?.export?.reading?.tries?.[t] || null;
+  if(typeof readingTry?.submitted === "boolean") return readingTry.submitted;
+  if(typeof score?.submitted === "boolean") return score.submitted;
+  return !!score?.complete;
+}
+function submittedReadingScoreForRecord(rec, t){
+  const score = rec?.export?.reading?.tries?.[t]?.score || rec?.readingScore?.[t] || null;
+  return (score && readingScoreWasSubmitted(rec, t, score)) ? score : null;
+}
 function latestReadingScoreForRecord(rec){
   for(const t of [3,2,1]){
-    const score = rec?.export?.reading?.tries?.[t]?.score || rec?.readingScore?.[t] || null;
-    if(score && (score.markedCount || score.complete)) return {tryNo:t, score};
+    const score = submittedReadingScoreForRecord(rec, t);
+    if(score) return {tryNo:t, score};
   }
   return null;
 }
@@ -3231,15 +3241,18 @@ function renderProgressChart(rawName){
       const spellingMastered = (typeof rec.overallSpellingMastered === "boolean")
         ? rec.overallSpellingMastered
         : computeSpellingMasteryFromExport(rec.export);
-      const readingMastered = (typeof rec.overallReadingMastered === "boolean")
-        ? rec.overallReadingMastered
-        : computeReadingMasteryFromExport(rec.export);
       const spellText = latest ? `Try ${latest.tryNo}: ${latest.score.correct}/${latest.score.total}` : "—";
       const readText = latestReading ? `Try ${latestReading.tryNo}: ${latestReading.score.correct}/${latestReading.score.total}` : "—";
+      const readStatus = latestReading
+        ? (latestReading.score.mastered ? `<span class="tagOk">Mastered</span>` : `<span class="tagBad">Working</span>`)
+        : `<span class="tiny">—</span>`;
+      const spellStatus = latest
+        ? (spellingMastered ? `<span class="tagOk">Mastered</span>` : `<span class="tagBad">Working</span>`)
+        : `<span class="tiny">—</span>`;
       cells += `
         <td class="progressCell" data-record-id="${escapeHtml(rec.id || "")}" title="Open latest word-by-word record">
-          <div><b>Read:</b> ${readingMastered ? `<span class="tagOk">Mastered</span>` : `<span class="tagBad">Working</span>`}</div>
-          <div style="margin-top:4px;"><b>Spell:</b> ${spellingMastered ? `<span class="tagOk">Mastered</span>` : `<span class="tagBad">Working</span>`}</div>
+          <div><b>Read:</b> ${readStatus}</div>
+          <div style="margin-top:4px;"><b>Spell:</b> ${spellStatus}</div>
           <div class="progressMeta"><b>R ${escapeHtml(readText)} • S ${escapeHtml(spellText)}</b><br>${escapeHtml(fmtDate(rec.savedAt || Date.now()))}<br>${history.length} dated record${history.length===1?"":"s"}</div>
         </td>
       `;
@@ -3349,9 +3362,9 @@ function renderTeacherTable(filterText=""){
     const s1 = r.export?.tries?.[1]?.score || r.tryScore?.[1] || null;
     const s2 = r.export?.tries?.[2]?.score || r.tryScore?.[2] || null;
     const s3 = r.export?.tries?.[3]?.score || r.tryScore?.[3] || null;
-    const rs1 = r.export?.reading?.tries?.[1]?.score || r.readingScore?.[1] || null;
-    const rs2 = r.export?.reading?.tries?.[2]?.score || r.readingScore?.[2] || null;
-    const rs3 = r.export?.reading?.tries?.[3]?.score || r.readingScore?.[3] || null;
+    const rs1 = submittedReadingScoreForRecord(r, 1);
+    const rs2 = submittedReadingScoreForRecord(r, 2);
+    const rs3 = submittedReadingScoreForRecord(r, 3);
     const readingMastered = (typeof r.overallReadingMastered === "boolean")
       ? r.overallReadingMastered
       : computeReadingMasteryFromExport(r.export);
@@ -3367,7 +3380,7 @@ function renderTeacherTable(filterText=""){
         <td>${fmtTryPair(rs1,s1)}</td>
         <td>${fmtTryPair(rs2,s2)}</td>
         <td>${fmtTryPair(rs3,s3)}</td>
-        <td><b>Read:</b> ${tag(readingMastered)}<br><span style="display:inline-block;height:5px;"></span><br><b>Spell:</b> ${tag(spellingMastered)}</td>
+        <td><b>Read:</b> ${latestReadingScoreForRecord(r) ? tag(readingMastered) : `<span class="tiny">—</span>`}<br><span style="display:inline-block;height:5px;"></span><br><b>Spell:</b> ${latestScoreForRecord(r) ? tag(spellingMastered) : `<span class="tiny">—</span>`}</td>
         <td class="tiny">${escapeHtml(fmtDate(r.savedAt||Date.now()))}</td>
         <td>
           <button class="btnSmall secondary" type="button" data-action="view" data-id="${escapeHtml(r.id||"")}">View Work</button>

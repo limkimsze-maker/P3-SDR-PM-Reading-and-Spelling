@@ -3116,27 +3116,23 @@ function resetActiveRecord(){
     localSavePill.classList.remove("localSaved");
   }
 }
-function restoreLatestPupilLesson(name){
-  const records = loadTeacherRecords()
-    .filter(r => sameStudent(r.studentName, name))
-    .sort((a,b)=>(a.savedAt||0)-(b.savedAt||0));
-  const rec = records[records.length - 1] || null;
+function findLatestPupilSessionRecord(name, sessionKey){
+  return loadTeacherRecords()
+    .filter(r => sameStudent(r.studentName, name) && String(r.sessionKey || "") === String(sessionKey || ""))
+    .sort((a,b)=>(a.savedAt||0)-(b.savedAt||0))
+    .pop() || null;
+}
+function restorePupilRecord(rec, name){
+  if(!rec) return false;
 
-  if(!rec){
-    sessionSel.value = "C1S1";
-    applySession("C1S1", true);
-    setMainPupilSelection(name);
-    resetActiveRecord();
-    return;
-  }
-
+  const pupilName = getRosterName(name || rec.studentName) || cleanStudentName(name || rec.studentName);
   const data = rec.export || null;
   const key = String(data?.sessionKey || rec.sessionKey || "");
-  if(key && SESSION_BANK[key] && TRIES_BANK[key]){
-    sessionSel.value = key;
-    applySession(key, true);
-  }
-  setMainPupilSelection(name);
+  if(!pupilName || !key || !SESSION_BANK[key] || !TRIES_BANK[key]) return false;
+
+  sessionSel.value = key;
+  applySession(key, true);
+  setMainPupilSelection(pupilName);
 
   if(data?.tries){
     for(const t of [1,2,3]){
@@ -3163,25 +3159,46 @@ function restoreLatestPupilLesson(name){
     renderDates();
     rebuildAll();
 
-    let lastTry = 1;
-    for(const t of [1,2,3]) if(marked[t]) lastTry = t;
-    setCurrentTry(lastTry);
-    const s = tryScore[lastTry];
-    if(s){
-      setStar(!!s.mastered);
+    let resumeTry = 1;
+    for(const t of [1,2,3]){
+      if(tryUnlocked[t] && (!marked[t] || !readingSubmitted[t])){
+        resumeTry = t;
+        break;
+      }
+      if(marked[t] || readingSubmitted[t]) resumeTry = t;
     }
+    setCurrentTry(resumeTry);
+    const s = tryScore[resumeTry];
+    setStar(!!s?.mastered);
     renderReadingAll();
     setReadingStar(computeReadingMastery());
-    updateCombinedScorePill(lastTry);
+    updateCombinedScorePill(resumeTry);
   }
 
   activeRecordId = rec.id || safeId();
-  activeRecordStudent = name;
-  activeRecordSession = sessionSel.value;
+  activeRecordStudent = pupilName;
+  activeRecordSession = key;
   if(localSavePill){
-    localSavePill.textContent = `Loaded last lesson: ${sessionSel.value}`;
+    localSavePill.textContent = `Loaded saved record: ${key}`;
     localSavePill.classList.add("localSaved");
   }
+  return true;
+}
+function restoreLatestPupilLesson(name){
+  const records = loadTeacherRecords()
+    .filter(r => sameStudent(r.studentName, name))
+    .sort((a,b)=>(a.savedAt||0)-(b.savedAt||0));
+  const rec = records[records.length - 1] || null;
+
+  if(!rec){
+    sessionSel.value = "C1S1";
+    applySession("C1S1", true);
+    setMainPupilSelection(name);
+    resetActiveRecord();
+    return;
+  }
+
+  restorePupilRecord(rec, name);
 }
 function chooseStudentForPM(rawName){
   const name = cleanStudentName(rawName);
@@ -4099,6 +4116,7 @@ function applySession(key, silent){
 
 sessionSel.addEventListener("change", ()=>{
   const key = sessionSel.value;
+  const pupilName = cleanStudentName(studentName.value || studentName.dataset.selectedPupil);
   if(hasCurrentPupilWork()){
     const ok = confirm("Switching session will clear the current pupil’s work on-screen. Continue?");
     if(!ok){
@@ -4106,7 +4124,16 @@ sessionSel.addEventListener("change", ()=>{
       return;
     }
   }
+  const savedRecord = pupilName ? findLatestPupilSessionRecord(pupilName, key) : null;
+  if(savedRecord && restorePupilRecord(savedRecord, pupilName)){
+    return;
+  }
+
   applySession(key);
+  if(pupilName) setMainPupilSelection(pupilName);
+  if(localSavePill && pupilName){
+    localSavePill.textContent = `New lesson: ${key}`;
+  }
 });
 
 (function initSessions(){

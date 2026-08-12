@@ -1,0 +1,106 @@
+name: Prefer complete PM records
+
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-record-recovery.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch record selection logic
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+
+          old = '''function findLatestPupilSessionRecord(name, sessionKey){
+  return loadTeacherRecords()
+    .filter(r => sameStudent(r.studentName, name) && String(r.sessionKey || "") === String(sessionKey || ""))
+    .sort((a,b)=>(a.savedAt||0)-(b.savedAt||0))
+    .pop() || null;
+}'''
+
+          new = '''function recordCompletenessScore(rec){
+  let score = 0;
+  const exp = rec?.export || null;
+
+  for(const t of [1,2,3]){
+    const td = exp?.tries?.[t] || null;
+    const rd = exp?.reading?.tries?.[t] || null;
+
+    if(td?.marked || rec?.tryScore?.[t]) score += 10000;
+    if(td?.score || rec?.tryScore?.[t]) score += 1500;
+    if(Array.isArray(td?.responses)){
+      score += td.responses.filter(v => cleanAnswer(v).length > 0).length * 120;
+    }else if(Array.isArray(rec?.preview?.[t])){
+      score += rec.preview[t].filter(v => cleanAnswer(v?.response).length > 0).length * 120;
+    }
+
+    if(rd?.submitted) score += 10000;
+    if(rd?.score || rec?.readingScore?.[t]) score += 1500;
+    if(Array.isArray(rd?.results)){
+      score += rd.results.filter(v => v === "good" || v === "bad").length * 80;
+    }
+  }
+
+  if(exp?.tries) score += 250;
+  if(exp?.reading?.tries) score += 250;
+  return score;
+}
+
+function pickBestPupilSessionRecord(records){
+  const list = Array.isArray(records) ? records.filter(Boolean) : [];
+  if(!list.length) return null;
+  return list.slice().sort((a,b)=>{
+    const sa = recordCompletenessScore(a);
+    const sb = recordCompletenessScore(b);
+    if(sa !== sb) return sa - sb;
+    return (a.savedAt||0) - (b.savedAt||0);
+  }).pop() || null;
+}
+
+function findLatestPupilSessionRecord(name, sessionKey){
+  return pickBestPupilSessionRecord(
+    loadTeacherRecords().filter(r =>
+      sameStudent(r.studentName, name) &&
+      String(r.sessionKey || "") === String(sessionKey || "")
+    )
+  );
+}'''
+
+          if old not in s:
+              raise SystemExit('Could not find record selection function')
+          s = s.replace(old, new, 1)
+
+          old2 = '''      const rec = history[history.length - 1] || null;'''
+          new2 = '''      const rec = pickBestPupilSessionRecord(history);'''
+          if old2 not in s:
+              raise SystemExit('Could not find chart record selection line')
+          s = s.replace(old2, new2, 1)
+
+          old3 = '''          <div><b>14. Choose a pupil under “View pupil record”</b>, then click any box in the Progress Chart to open that exact Cycle and Session for a fresh test. Use Dated Records below to inspect earlier work.</div>'''
+          new3 = '''          <div><b>14. Choose a pupil under “View pupil record”</b>, then click any box in the Progress Chart. If saved work exists, the most complete saved record for that Cycle and Session is restored into the test screen. If no saved work exists, a fresh test opens. All dated records remain available below.</div>'''
+          if old3 in s:
+              s = s.replace(old3, new3, 1)
+
+          old4 = '''    <div class="tiny" style="margin-bottom:8px;">Click any Cycle/Session box to open a fresh test for <b>${escapeHtml(name)}</b>.</div>'''
+          new4 = '''    <div class="tiny" style="margin-bottom:8px;">Click any Cycle/Session box to restore the most complete saved work for <b>${escapeHtml(name)}</b>, or open a fresh test if no record exists.</div>'''
+          if old4 in s:
+              s = s.replace(old4, new4, 1)
+
+          p.write_text(s, encoding='utf-8')
+          PY
+      - name: Commit change
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Prefer most complete saved PM record for recovery [skip ci]"
+          git push

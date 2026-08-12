@@ -1,0 +1,96 @@
+name: Safe restore merge PM records
+
+on:
+  push:
+    paths:
+      - '.github/workflows/safe-restore-merge.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch restore/import to merge safely
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+
+          old = '''    const importedRecords = data.records.map(r => ({...r, id:r.id || safeId()}));
+    saveTeacherRecords(importedRecords);
+    if(okV5 || okV4 || okV3) saveStudentRoster(data.pupils);
+    else saveStudentRoster(importedRecords.map(r => r.studentName));
+    resetActiveRecord();
+    renderRoster();'''
+
+          new = '''    const importedRecords = data.records.map(r => ({...r, id:r.id || safeId()}));
+    const currentRecords = loadTeacherRecords();
+    const mergedById = new Map();
+
+    for(const rawRec of currentRecords){
+      if(!rawRec) continue;
+      const id = String(rawRec.id || safeId());
+      mergedById.set(id, {...rawRec, id});
+    }
+
+    for(const rawRec of importedRecords){
+      if(!rawRec) continue;
+      const id = String(rawRec.id || safeId());
+      const candidate = {...rawRec, id};
+      const existing = mergedById.get(id);
+      if(!existing){
+        mergedById.set(id, candidate);
+        continue;
+      }
+
+      const existingScore = recordCompletenessScore(existing);
+      const candidateScore = recordCompletenessScore(candidate);
+      if(candidateScore > existingScore ||
+         (candidateScore === existingScore && (candidate.savedAt || 0) > (existing.savedAt || 0))){
+        mergedById.set(id, candidate);
+      }
+    }
+
+    const mergedRecords = [...mergedById.values()];
+    saveTeacherRecords(mergedRecords);
+
+    const importedNames = (okV5 || okV4 || okV3)
+      ? data.pupils
+      : importedRecords.map(r => r.studentName);
+    saveStudentRoster([
+      ...loadStudentRoster(),
+      ...importedNames,
+      ...mergedRecords.map(r => r.studentName)
+    ]);
+    resetActiveRecord();
+    renderRoster();'''
+
+          if old not in s:
+              raise SystemExit('Could not locate Teacher Records import block')
+          s = s.replace(old, new, 1)
+
+          s = s.replace(
+            '<b>Import</b> restores that complete backup and replaces the pupil list and records currently stored in this browser.',
+            '<b>Restore / Merge</b> safely adds records from a backup to this browser. Existing records are kept, and the more complete copy is used when the same saved record appears twice.',
+            1
+          )
+          s = s.replace('Import All Records JSON', 'Restore / Merge Records JSON')
+          s = s.replace(
+            'restores a complete class backup. It replaces the pupil list and records currently stored in this browser, so export a backup first if those records are still needed.',
+            'safely restores a class backup by merging it with the pupil list and records already in this browser. Existing dated records are not deleted.',
+            1
+          )
+
+          p.write_text(s, encoding='utf-8')
+          PY
+      - name: Commit patched webpage
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Make Teacher Records restore merge non-destructive [skip ci]"
+          git push

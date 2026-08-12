@@ -1313,13 +1313,13 @@
         <div class="tiny" style="margin-bottom:9px;">
           Reading and Spelling work is saved automatically to the selected pupil’s local record.
           <b>Export</b> downloads one backup containing the full pupil list and every dated record.
-          <b>Import</b> restores that complete backup and replaces the pupil list and records currently stored in this browser.
+          <b>Restore / Merge</b> safely adds records from a backup to this browser. Existing records are kept, and the more complete copy is used when the same saved record appears twice.
         </div>
         <div class="teacherRow" style="margin-bottom:0;">
           <button class="btnSmall secondary" id="exportRecordsBtn" type="button">Export All Records JSON</button>
 
           <label class="btnSmall secondary" style="position:relative; overflow:hidden;">
-            Import All Records JSON
+            Restore / Merge Records JSON
             <input id="importRecordsFile" type="file" accept="application/json" style="position:absolute; inset:0; opacity:0; cursor:pointer;">
           </label>
         </div>
@@ -1371,7 +1371,7 @@
           <div><b>9. “Download JSON” on the main page</b> exports the current pupil’s work, including Reading, Spelling and the current audio settings.</div>
           <div><b>10. “Upload JSON” on the main page</b> restores one pupil’s exported work on this or another computer/browser. Included audio settings are also applied.</div>
           <div><b>11. “Export All Records JSON” in the Teacher Panel</b> downloads one complete class backup containing the saved pupil list and every pupil’s dated Reading and Spelling records.</div>
-          <div><b>12. “Import All Records JSON” in the Teacher Panel</b> restores a complete class backup. It replaces the pupil list and records currently stored in this browser, so export a backup first if those records are still needed.</div>
+          <div><b>12. “Restore / Merge Records JSON” in the Teacher Panel</b> safely restores a class backup by merging it with the pupil list and records already in this browser. Existing dated records are not deleted.</div>
           <div><b>13. Every Reading mark and every marked Spelling try is saved automatically</b> to the pupil’s dated local record.</div>
           <div><b>14. Choose a pupil under “View pupil record”</b>, then click any box in the Progress Chart. If saved work exists, the most complete saved record for that Cycle and Session is restored into the test screen. If no saved work exists, a fresh test opens. All dated records remain available below.</div>
           <div><b>15. For a complete local records reset</b>, hold <b>“Hold 5s — Full Reset”</b> until the progress streak reaches the end. Release early to cancel.</div>
@@ -4034,9 +4034,44 @@ importRecordsFile.addEventListener("change", async (e)=>{
     }
 
     const importedRecords = data.records.map(r => ({...r, id:r.id || safeId()}));
-    saveTeacherRecords(importedRecords);
-    if(okV5 || okV4 || okV3) saveStudentRoster(data.pupils);
-    else saveStudentRoster(importedRecords.map(r => r.studentName));
+    const currentRecords = loadTeacherRecords();
+    const mergedById = new Map();
+
+    for(const rawRec of currentRecords){
+      if(!rawRec) continue;
+      const id = String(rawRec.id || safeId());
+      mergedById.set(id, {...rawRec, id});
+    }
+
+    for(const rawRec of importedRecords){
+      if(!rawRec) continue;
+      const id = String(rawRec.id || safeId());
+      const candidate = {...rawRec, id};
+      const existing = mergedById.get(id);
+      if(!existing){
+        mergedById.set(id, candidate);
+        continue;
+      }
+
+      const existingScore = recordCompletenessScore(existing);
+      const candidateScore = recordCompletenessScore(candidate);
+      if(candidateScore > existingScore ||
+         (candidateScore === existingScore && (candidate.savedAt || 0) > (existing.savedAt || 0))){
+        mergedById.set(id, candidate);
+      }
+    }
+
+    const mergedRecords = [...mergedById.values()];
+    saveTeacherRecords(mergedRecords);
+
+    const importedNames = (okV5 || okV4 || okV3)
+      ? data.pupils
+      : importedRecords.map(r => r.studentName);
+    saveStudentRoster([
+      ...loadStudentRoster(),
+      ...importedNames,
+      ...mergedRecords.map(r => r.studentName)
+    ]);
     resetActiveRecord();
     renderRoster();
     renderTeacherTable(progressPupilSel.value);

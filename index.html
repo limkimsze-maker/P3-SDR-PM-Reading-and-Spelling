@@ -3573,8 +3573,8 @@ function launchPupilSessionFromChart(rawName, key){
   }
   closeTeacherPanel();
 
-  const card = document.getElementById("card");
-  if(card) card.scrollIntoView({behavior:"smooth", block:"start"});
+  const testArea = document.querySelector(".sessionSheet");
+  if(testArea) testArea.scrollIntoView({behavior:"smooth", block:"start"});
   setTimeout(()=>{
     const first = document.getElementById("in-t1-0");
     if(first) first.focus();

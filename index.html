@@ -3558,11 +3558,20 @@ function launchPupilSessionFromChart(rawName, key){
   if(!name || !SESSION_BANK[key] || !TRIES_BANK[key] || !READING_BANK[key]) return;
 
   if(hasCurrentPupilWork()){
-    const ok = confirm(`Start a fresh ${key} test for ${name}? Any unmarked on-screen work will be cleared. Saved records will remain in Teacher Panel.`);
+    const ok = confirm(`Open ${key} for ${name}? Current on-screen work may be replaced by the saved record for this pupil/session. Saved Teacher Panel records will remain.`);
     if(!ok) return;
   }
 
   ensureRosterContains(name);
+
+  const savedRecord = findLatestPupilSessionRecord(name, key);
+  if(savedRecord && restorePupilRecord(savedRecord, name)){
+    closeTeacherPanel();
+    const testArea = document.querySelector(".sessionSheet");
+    if(testArea) testArea.scrollIntoView({behavior:"smooth", block:"start"});
+    return;
+  }
+
   sessionSel.value = key;
   applySession(key, true);
   setMainPupilSelection(name);
@@ -3580,6 +3589,7 @@ function launchPupilSessionFromChart(rawName, key){
     if(first) first.focus();
   }, 180);
 }
+
 
 progressChartWrap.addEventListener("click", (e)=>{
   const cell = e.target.closest("[data-session-key]");

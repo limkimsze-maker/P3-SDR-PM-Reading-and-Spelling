@@ -1,0 +1,75 @@
+name: Restore saved PM session from chart
+
+on:
+  push:
+    paths:
+      - '.github/workflows/restore-saved-session.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Restore saved record before opening fresh session
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          old = '''  ensureRosterContains(name);
+  sessionSel.value = key;
+  applySession(key, true);
+  setMainPupilSelection(name);
+  resetActiveRecord();
+  if(localSavePill){
+    localSavePill.textContent = `Ready to test: ${key}`;
+    localSavePill.classList.remove("localSaved");
+  }
+  closeTeacherPanel();
+
+  const testArea = document.querySelector(".sessionSheet");
+  if(testArea) testArea.scrollIntoView({behavior:"smooth", block:"start"});
+  setTimeout(()=>{
+    const first = document.getElementById("in-t1-0");
+    if(first) first.focus();
+  }, 180);'''
+          new = '''  ensureRosterContains(name);
+
+  const savedRecord = findLatestPupilSessionRecord(name, key);
+  if(savedRecord && restorePupilRecord(savedRecord, name)){
+    closeTeacherPanel();
+    const testArea = document.querySelector(".sessionSheet");
+    if(testArea) testArea.scrollIntoView({behavior:"smooth", block:"start"});
+    return;
+  }
+
+  sessionSel.value = key;
+  applySession(key, true);
+  setMainPupilSelection(name);
+  resetActiveRecord();
+  if(localSavePill){
+    localSavePill.textContent = `Ready to test: ${key}`;
+    localSavePill.classList.remove("localSaved");
+  }
+  closeTeacherPanel();
+
+  const testArea = document.querySelector(".sessionSheet");
+  if(testArea) testArea.scrollIntoView({behavior:"smooth", block:"start"});
+  setTimeout(()=>{
+    const first = document.getElementById("in-t1-0");
+    if(first) first.focus();
+  }, 180);'''
+          if old not in s:
+              raise SystemExit('Chart launch snippet not found')
+          p.write_text(s.replace(old, new, 1), encoding='utf-8')
+          PY
+      - name: Commit restored-session behaviour
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Restore saved PM work when opening chart session [skip ci]"
+          git push

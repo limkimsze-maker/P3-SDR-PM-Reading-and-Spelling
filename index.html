@@ -1373,7 +1373,7 @@
           <div><b>11. “Export All Records JSON” in the Teacher Panel</b> downloads one complete class backup containing the saved pupil list and every pupil’s dated Reading and Spelling records.</div>
           <div><b>12. “Import All Records JSON” in the Teacher Panel</b> restores a complete class backup. It replaces the pupil list and records currently stored in this browser, so export a backup first if those records are still needed.</div>
           <div><b>13. Every Reading mark and every marked Spelling try is saved automatically</b> to the pupil’s dated local record.</div>
-          <div><b>14. Choose a pupil under “View pupil record”</b>, then click any box in the Progress Chart to open that exact Cycle and Session for a fresh test. Use Dated Records below to inspect earlier work.</div>
+          <div><b>14. Choose a pupil under “View pupil record”</b>, then click any box in the Progress Chart. If saved work exists, the most complete saved record for that Cycle and Session is restored into the test screen. If no saved work exists, a fresh test opens. All dated records remain available below.</div>
           <div><b>15. For a complete local records reset</b>, hold <b>“Hold 5s — Full Reset”</b> until the progress streak reaches the end. Release early to cancel.</div>
         </div>
       </details>
@@ -3116,11 +3116,52 @@ function resetActiveRecord(){
     localSavePill.classList.remove("localSaved");
   }
 }
+function recordCompletenessScore(rec){
+  let score = 0;
+  const exp = rec?.export || null;
+
+  for(const t of [1,2,3]){
+    const td = exp?.tries?.[t] || null;
+    const rd = exp?.reading?.tries?.[t] || null;
+
+    if(td?.marked || rec?.tryScore?.[t]) score += 10000;
+    if(td?.score || rec?.tryScore?.[t]) score += 1500;
+    if(Array.isArray(td?.responses)){
+      score += td.responses.filter(v => cleanAnswer(v).length > 0).length * 120;
+    }else if(Array.isArray(rec?.preview?.[t])){
+      score += rec.preview[t].filter(v => cleanAnswer(v?.response).length > 0).length * 120;
+    }
+
+    if(rd?.submitted) score += 10000;
+    if(rd?.score || rec?.readingScore?.[t]) score += 1500;
+    if(Array.isArray(rd?.results)){
+      score += rd.results.filter(v => v === "good" || v === "bad").length * 80;
+    }
+  }
+
+  if(exp?.tries) score += 250;
+  if(exp?.reading?.tries) score += 250;
+  return score;
+}
+
+function pickBestPupilSessionRecord(records){
+  const list = Array.isArray(records) ? records.filter(Boolean) : [];
+  if(!list.length) return null;
+  return list.slice().sort((a,b)=>{
+    const sa = recordCompletenessScore(a);
+    const sb = recordCompletenessScore(b);
+    if(sa !== sb) return sa - sb;
+    return (a.savedAt||0) - (b.savedAt||0);
+  }).pop() || null;
+}
+
 function findLatestPupilSessionRecord(name, sessionKey){
-  return loadTeacherRecords()
-    .filter(r => sameStudent(r.studentName, name) && String(r.sessionKey || "") === String(sessionKey || ""))
-    .sort((a,b)=>(a.savedAt||0)-(b.savedAt||0))
-    .pop() || null;
+  return pickBestPupilSessionRecord(
+    loadTeacherRecords().filter(r =>
+      sameStudent(r.studentName, name) &&
+      String(r.sessionKey || "") === String(sessionKey || "")
+    )
+  );
 }
 function restorePupilRecord(rec, name){
   if(!rec) return false;
@@ -3298,7 +3339,7 @@ function renderProgressChart(rawName){
     for(let session=1; session<=3; session++){
       const key = `C${cycle}S${session}`;
       const history = bySession.get(key) || [];
-      const rec = history[history.length - 1] || null;
+      const rec = pickBestPupilSessionRecord(history);
       if(!rec){
         cells += `<td class="progressCell empty" data-session-key="${key}" data-pupil="${escapeHtml(name)}" title="Test ${escapeHtml(name)} — Cycle ${cycle} Session ${session}">—</td>`;
         continue;
@@ -3329,7 +3370,7 @@ function renderProgressChart(rawName){
 
   progressChartTitle.textContent = `${name} — Progress Chart`;
   progressChartWrap.innerHTML = `
-    <div class="tiny" style="margin-bottom:8px;">Click any Cycle/Session box to open a fresh test for <b>${escapeHtml(name)}</b>.</div>
+    <div class="tiny" style="margin-bottom:8px;">Click any Cycle/Session box to restore the most complete saved work for <b>${escapeHtml(name)}</b>, or open a fresh test if no record exists.</div>
     <table class="progressTable">
       <thead><tr><th>Cycle</th><th>Session 1</th><th>Session 2</th><th>Session 3</th></tr></thead>
       <tbody>${rows}</tbody>

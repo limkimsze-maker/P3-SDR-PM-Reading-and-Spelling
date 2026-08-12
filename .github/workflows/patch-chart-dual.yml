@@ -1,0 +1,108 @@
+name: Patch chart dual actions
+
+on:
+  push:
+    paths:
+      - '.github/workflows/patch-chart-dual.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Patch index.html
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+
+          old = '''          <div><b>14. Choose a pupil under “View pupil record”</b> to view the progress chart and full word-by-word history.</div>'''
+          new = '''          <div><b>14. Choose a pupil under “View pupil record”</b>. In the Progress Chart, press <b>Test</b> to administer that exact Cycle and Session. Click an existing result box itself to view the old saved work. Dated Records below remain unchanged.</div>'''
+          if old in s:
+              s = s.replace(old, new, 1)
+
+          old = '''        cells += `<td class="progressCell empty">—</td>`;'''
+          new = '''        cells += `<td class="progressCell empty"><button class="btnSmall good" type="button" data-test-session="${key}" data-test-pupil="${escapeHtml(name)}" title="Test ${escapeHtml(name)} — Cycle ${cycle} Session ${session}" style="padding:7px 10px; box-shadow:none;">Test</button></td>`;'''
+          if old not in s:
+              raise SystemExit('Could not find empty progress cell snippet')
+          s = s.replace(old, new, 1)
+
+          old = '''          <div class="progressMeta"><b>R ${escapeHtml(readText)} • S ${escapeHtml(spellText)}</b><br>${escapeHtml(fmtDate(rec.savedAt || Date.now()))}<br>${history.length} dated record${history.length===1?"":"s"}</div>
+        </td>'''
+          new = '''          <div class="progressMeta"><b>R ${escapeHtml(readText)} • S ${escapeHtml(spellText)}</b><br>${escapeHtml(fmtDate(rec.savedAt || Date.now()))}<br>${history.length} dated record${history.length===1?"":"s"}</div>
+          <button class="btnSmall good" type="button" data-test-session="${key}" data-test-pupil="${escapeHtml(name)}" title="Start a fresh ${key} test for ${escapeHtml(name)}" style="margin-top:7px; padding:7px 10px; box-shadow:none;">Test</button>
+        </td>'''
+          if old not in s:
+              raise SystemExit('Could not find populated progress cell snippet')
+          s = s.replace(old, new, 1)
+
+          old = '''progressChartWrap.addEventListener("click", (e)=>{
+  const cell = e.target.closest("[data-record-id]");
+  if(!cell) return;
+  const rec = getRecordById(cell.dataset.recordId);
+  if(rec){
+    renderRecordDetail(rec);
+    recordDetail.scrollIntoView({behavior:"smooth", block:"nearest"});
+  }
+});'''
+          new = '''function launchFreshPupilSessionFromChart(rawName, key){
+  const name = getRosterName(rawName) || cleanStudentName(rawName);
+  if(!name || !SESSION_BANK[key] || !TRIES_BANK[key] || !READING_BANK[key]) return;
+
+  if(hasCurrentPupilWork()){
+    const ok = confirm(`Start a fresh ${key} test for ${name}? Any current on-screen work has already been saved after marking. Existing dated records will not be deleted or replaced.`);
+    if(!ok) return;
+  }
+
+  ensureRosterContains(name);
+  sessionSel.value = key;
+  applySession(key, true);
+  setMainPupilSelection(name);
+  resetActiveRecord();
+  if(localSavePill){
+    localSavePill.textContent = `Ready to test: ${key}`;
+    localSavePill.classList.remove("localSaved");
+  }
+  closeTeacherPanel();
+  const card = document.getElementById("card");
+  if(card) card.scrollIntoView({behavior:"smooth", block:"start"});
+}
+
+progressChartWrap.addEventListener("click", (e)=>{
+  const testBtn = e.target.closest("[data-test-session]");
+  if(testBtn){
+    e.preventDefault();
+    e.stopPropagation();
+    launchFreshPupilSessionFromChart(testBtn.dataset.testPupil || progressPupilSel.value, testBtn.dataset.testSession || "");
+    return;
+  }
+
+  const cell = e.target.closest("[data-record-id]");
+  if(!cell) return;
+  const rec = getRecordById(cell.dataset.recordId);
+  if(rec){
+    renderRecordDetail(rec);
+    recordDetail.scrollIntoView({behavior:"smooth", block:"nearest"});
+  }
+});'''
+          if old not in s:
+              raise SystemExit('Could not find progress chart click listener')
+          s = s.replace(old, new, 1)
+
+          p.write_text(s, encoding='utf-8')
+          PY
+      - name: Commit patched page
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git diff --cached --quiet && exit 0
+          git commit -m "Keep old PM records and add chart Test links [skip ci]"
+          git push

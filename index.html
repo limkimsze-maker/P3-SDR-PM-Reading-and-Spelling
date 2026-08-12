@@ -616,7 +616,7 @@
     .progressCell:hover{background:#f0f9ff;}
     .progressCell.empty{
       color:#94a3b8;
-      cursor:default;
+      cursor:pointer;
       text-align:center;
       background:#f8fafc;
     }
@@ -1373,7 +1373,7 @@
           <div><b>11. “Export All Records JSON” in the Teacher Panel</b> downloads one complete class backup containing the saved pupil list and every pupil’s dated Reading and Spelling records.</div>
           <div><b>12. “Import All Records JSON” in the Teacher Panel</b> restores a complete class backup. It replaces the pupil list and records currently stored in this browser, so export a backup first if those records are still needed.</div>
           <div><b>13. Every Reading mark and every marked Spelling try is saved automatically</b> to the pupil’s dated local record.</div>
-          <div><b>14. Choose a pupil under “View pupil record”</b> to view the progress chart and full word-by-word history.</div>
+          <div><b>14. Choose a pupil under “View pupil record”</b>, then click any box in the Progress Chart to open that exact Cycle and Session for a fresh test. Use Dated Records below to inspect earlier work.</div>
           <div><b>15. For a complete local records reset</b>, hold <b>“Hold 5s — Full Reset”</b> until the progress streak reaches the end. Release early to cancel.</div>
         </div>
       </details>
@@ -3300,7 +3300,7 @@ function renderProgressChart(rawName){
       const history = bySession.get(key) || [];
       const rec = history[history.length - 1] || null;
       if(!rec){
-        cells += `<td class="progressCell empty">—</td>`;
+        cells += `<td class="progressCell empty" data-session-key="${key}" data-pupil="${escapeHtml(name)}" title="Test ${escapeHtml(name)} — Cycle ${cycle} Session ${session}">—</td>`;
         continue;
       }
       const latest = latestScoreForRecord(rec);
@@ -3317,7 +3317,7 @@ function renderProgressChart(rawName){
         ? (spellingMastered ? `<span class="tagOk">Mastered</span>` : `<span class="tagBad">Working</span>`)
         : `<span class="tiny">—</span>`;
       cells += `
-        <td class="progressCell" data-record-id="${escapeHtml(rec.id || "")}" title="Open latest word-by-word record">
+        <td class="progressCell" data-record-id="${escapeHtml(rec.id || "")}" data-session-key="${key}" data-pupil="${escapeHtml(name)}" title="Test ${escapeHtml(name)} — Cycle ${cycle} Session ${session}">
           <div><b>Read:</b> ${readStatus}</div>
           <div style="margin-top:4px;"><b>Spell:</b> ${spellStatus}</div>
           <div class="progressMeta"><b>R ${escapeHtml(readText)} • S ${escapeHtml(spellText)}</b><br>${escapeHtml(fmtDate(rec.savedAt || Date.now()))}<br>${history.length} dated record${history.length===1?"":"s"}</div>
@@ -3329,6 +3329,7 @@ function renderProgressChart(rawName){
 
   progressChartTitle.textContent = `${name} — Progress Chart`;
   progressChartWrap.innerHTML = `
+    <div class="tiny" style="margin-bottom:8px;">Click any Cycle/Session box to open a fresh test for <b>${escapeHtml(name)}</b>.</div>
     <table class="progressTable">
       <thead><tr><th>Cycle</th><th>Session 1</th><th>Session 2</th><th>Session 3</th></tr></thead>
       <tbody>${rows}</tbody>
@@ -3552,14 +3553,38 @@ for(const zone of [pupilAdminDrop, studentNameDrop]){
   });
 }
 
-progressChartWrap.addEventListener("click", (e)=>{
-  const cell = e.target.closest("[data-record-id]");
-  if(!cell) return;
-  const rec = getRecordById(cell.dataset.recordId);
-  if(rec){
-    renderRecordDetail(rec);
-    recordDetail.scrollIntoView({behavior:"smooth", block:"nearest"});
+function launchPupilSessionFromChart(rawName, key){
+  const name = getRosterName(rawName) || cleanStudentName(rawName);
+  if(!name || !SESSION_BANK[key] || !TRIES_BANK[key] || !READING_BANK[key]) return;
+
+  if(hasCurrentPupilWork()){
+    const ok = confirm(`Start a fresh ${key} test for ${name}? Any unmarked on-screen work will be cleared. Saved records will remain in Teacher Panel.`);
+    if(!ok) return;
   }
+
+  ensureRosterContains(name);
+  sessionSel.value = key;
+  applySession(key, true);
+  setMainPupilSelection(name);
+  resetActiveRecord();
+  if(localSavePill){
+    localSavePill.textContent = `Ready to test: ${key}`;
+    localSavePill.classList.remove("localSaved");
+  }
+  closeTeacherPanel();
+
+  const card = document.getElementById("card");
+  if(card) card.scrollIntoView({behavior:"smooth", block:"start"});
+  setTimeout(()=>{
+    const first = document.getElementById("in-t1-0");
+    if(first) first.focus();
+  }, 180);
+}
+
+progressChartWrap.addEventListener("click", (e)=>{
+  const cell = e.target.closest("[data-session-key]");
+  if(!cell) return;
+  launchPupilSessionFromChart(cell.dataset.pupil || progressPupilSel.value, cell.dataset.sessionKey || "");
 });
 
 studentName.addEventListener("change", ()=>{
